@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <title>MA Tools</title>
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+  </head>
+  <body>
+    <div class="container">
+      <h3>MA Package Explorer</h3>
+      <div class="row">
+        <div class="col s12">
+          <ul class="tabs">
+            <li class="tab col s6"><a href="#filestab">Files</a></li>
+            <li class="tab col s6"><a href="#previewtab">Preview</a></li>
+          </ul>
+        </div>
+        <div id="filestab" class="col s12">
+          <div id="dropzone" class="card-panel deep-orange lighten-2 center-align">
+            <h5>Drop a .mst file here to begin.</h5>
+          </div>
+          <ul id="entrylist" class="collection" style="display: none">
+            <a href="#" class="collection-item">No entries in package</a>
+          </ul>
+        </div>
+        <div id="previewtab" class="col s12">
+          <h4 id="previewname"></h4>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="js/dragster.js"></script>
+    <script src="js/materialize.min.js"></script>
+
+    <script src="js/mstfile.js"></script>
+    <script src="js/mstreader.js"></script>
+    <script src="js/msterror.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
