@@ -1,7 +1,4 @@
-function UI()
-{
-
-}
+window.UI = {};
 
 // Static globals
 UI.ERROR_CLASS = "red darken-2"; // Classes to apply to error toasts.
