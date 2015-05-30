@@ -12,3 +12,14 @@
 {
   opacity: 0.5;
 }
+
+/* Color pagination correctly when order is ul > a > li */
+.pagination a li
+{
+  color: #000;
+}
+
+.pagination a li.active
+{
+  color: #fff;
+}

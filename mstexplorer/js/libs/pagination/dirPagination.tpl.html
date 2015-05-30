@@ -1,0 +1,20 @@
+<ul class="pagination center-align" ng-if="1 < pages.length">
+    <li ng-if="boundaryLinks" ng-class="{ disabled : pagination.current == 1 }">
+        <a href="" ng-click="setCurrent(1)">&laquo;</a>
+    </li>
+
+    <li ng-if="directionLinks" ng-class="{ disabled : pagination.current == 1 }">
+        <a href="" ng-click="setCurrent(pagination.current - 1)"><i class="mdi-navigation-chevron-left"></i></a>
+    </li>
+    
+    <a ng-repeat="pageNumber in pages track by $index">
+        <li class="waves-effect" ng-click="setCurrent(pageNumber)" ng-class="{ active: pagination.current == pageNumber, disabled: pageNumber == '...' }">{{pageNumber}}</li>
+    </a>
+
+    <li ng-if="directionLinks" ng-class="{ disabled : pagination.current == pagination.last }">
+        <a href="" ng-click="setCurrent(pagination.current + 1)"><i class="mdi-navigation-chevron-right"></i></a>
+    </li>
+    <li ng-if="boundaryLinks"  ng-class="{ disabled : pagination.current == pagination.last }">
+        <a href="" ng-click="setCurrent(pagination.last)">&raquo;</a>
+    </li>
+</ul>
