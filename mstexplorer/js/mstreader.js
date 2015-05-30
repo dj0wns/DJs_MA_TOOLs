@@ -1,6 +1,8 @@
 function MSTReader()
 {
   this._littleEndian = true;
+  this._fileNameLen = 20;
+  this._fileStride = 36;
   this._entryCount = 0;
   this.entries = [];
 }
@@ -11,7 +13,6 @@ MSTReader.prototype.load = function(file, callback)
   this._loadCallback = callback;
   this._fileReader = new FileReader();
 
-  var headerBlob = this._file.slice(0, 16);
   this._fileReader.onloadend = this._onLoadHeader.bind(this);
   this._fileReader.readAsArrayBuffer(headerBlob);
 }
@@ -33,9 +34,16 @@ MSTReader.prototype._onLoadHeader = function(evt)
     return;
   }
 
+  // Hacky check to see if it's the PS2 version which has an extra four nulls at the end of the name string
+  var ps2check = view.getUint32(72, this._littleEndian);
+  if (ps2check == 3) {
+    this._fileNameLen = 24;
+    this._fileStride = 40;
+  }
+
   this._entryCount = view.getUint32(12, this._littleEndian);
 
-  var entriesBlob = this._file.slice(108, 108 + 36 * this._entryCount);
+  var entriesBlob = this._file.slice(108, 108 + this._fileStride * this._entryCount);
   this._fileReader.onloadend = this._onLoadEntries.bind(this);
   this._fileReader.readAsArrayBuffer(entriesBlob);
 }
@@ -50,12 +58,12 @@ MSTReader.prototype._onLoadEntries = function(evt)
     var view = new DataView(evt.target.result, 0);
 
     this.entries = [];
-    for (var i = 0; i < (this._entryCount - 1) * 36; i += 36) {
-      var nameBuffer = new Uint8Array(evt.target.result, i, 20);
+    for (var i = 0; i < (this._entryCount - 1) * this._fileStride; i += this._fileStride) {
+      var nameBuffer = new Uint8Array(evt.target.result, i, this._fileNameLen);
       var name = String.fromCharCode.apply(null, nameBuffer).replace(/\0/g, '').trim();
 
-      var location = view.getUint32(i + 20, this._littleEndian);
-      var length = view.getUint32(i + 24, this._littleEndian);
+      var location = view.getUint32(i + this._fileNameLen, this._littleEndian);
+      var length = view.getUint32(i + this._fileNameLen + 4, this._littleEndian);
 
       var mstFile = new MSTFile(this._file, name, location, length);
       this.entries.push(mstFile);
