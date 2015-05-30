@@ -13,6 +13,7 @@ MSTReader.prototype.load = function(file, callback)
   this._loadCallback = callback;
   this._fileReader = new FileReader();
 
+  var headerBlob = this._file.slice(0, 108);
   this._fileReader.onloadend = this._onLoadHeader.bind(this);
   this._fileReader.readAsArrayBuffer(headerBlob);
 }
