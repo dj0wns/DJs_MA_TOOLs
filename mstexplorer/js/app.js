@@ -5,10 +5,8 @@
 	module.controller("maTools", ["$scope", function ($scope)
 	{
 		var reader = new MSTReader();
-		var ui = new UI();
 
 		window.reader = reader; // debug
-		window.ui = ui; // debug
 
 		$("#dropzone").dragster({
 			enter: function (ev)
