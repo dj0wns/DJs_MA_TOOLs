@@ -23,3 +23,14 @@
 {
   color: #fff;
 }
+
+p.file-type-checkbox
+{
+  float: left;
+  margin-right: 20px;
+}
+
+.file-type-filters
+{
+  margin-top: 15px;
+}
