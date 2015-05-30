@@ -20,7 +20,7 @@ MSTFile.prototype.load = function(callback)
 MSTFile.prototype._onLoadData = function(evt)
 {
   if (evt.target.readyState != FileReader.DONE) {
-    this._loadCallback(null, "Error reading file contents");
+    this._loadCallback(null, new MSTError("Error reading file contents"));
     return;
   }
   this._loadCallback(evt.target.result, null);

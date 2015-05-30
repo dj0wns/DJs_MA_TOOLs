@@ -19,7 +19,7 @@ MSTReader.prototype.load = function(file, callback)
 MSTReader.prototype._onLoadHeader = function(evt)
 {
   if (evt.target.readyState != FileReader.DONE) {
-    this._loadCallback(null, "Error reading header");
+    this._loadCallback(null, new MSTError("Error reading header"));
     return;
   }
 
@@ -29,7 +29,7 @@ MSTReader.prototype._onLoadHeader = function(evt)
   if (fang == 0x474E4146) this._littleEndian = true; // Ascii FANG (Xbox, PS2)
   else if (fang == 0x46414E47) this._littleEndian = false; // Ascii GNAF (GameCube)
   else {
-    this._loadCallback(null, "MST does not contain a valid FANG header");
+    this._loadCallback(null, new MSTError("MST does not contain a valid FANG header"));
     return;
   }
 
@@ -43,7 +43,7 @@ MSTReader.prototype._onLoadHeader = function(evt)
 MSTReader.prototype._onLoadEntries = function(evt)
 {
     if (evt.target.readyState != FileReader.DONE) {
-      this._loadCallback(null, "Error reading entries");
+      this._loadCallback(null, new MSTError("Error reading entries"));
       return;
     }
 
