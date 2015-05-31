@@ -30,7 +30,7 @@
                 </div>
                 <div class="col s8 file-type-filters">
                   <p class="file-type-checkbox" ng-repeat="fileType in fileTypes" title="{{fileType.description}}">
-                    <input type="checkbox" id="fileType_{{fileType.extension}}" ng-model="query.fileTypes[fileType.extension]" checked />
+                    <input type="checkbox" id="fileType_{{fileType.extension}}" ng-model="fileType.checked" />
                     <label for="fileType_{{fileType.extension}}">{{fileType.name}}</label>
                   </p>
                 </div>
@@ -44,7 +44,7 @@
           </div>
           <ul id="entrylist" class="collection">
             <a href="#" class="collection-item" ng-show="files.length == 0">No entries in package</a>
-            <div class="collection-item file" dir-paginate="file in files | fileFilter:filter | itemsPerPage: 30">
+            <div class="collection-item file" dir-paginate="file in files | fileFilter:filter | itemsPerPage: settings.itemsPerPage">
               <span class="file-name">{{file.name}}</span>
             </div>
            </ul>

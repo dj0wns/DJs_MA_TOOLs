@@ -10,9 +10,13 @@ angular.module("maTools").filter("fileFilter", function ()
 		for(var i = 0; i < items.length; ++i)
 		{
 			var item = items[i];
-			var extension = item.name.substr(item.name.lastIndexOf(".") + 1);
+			var extension = item.name.substr(item.name.lastIndexOf(".") + 1).toUpperCase();
+			var checked = filter.fileTypes[extension];
 
-			if (item.name.indexOf(filter.query) != -1)
+			if (checked == undefined && filter.fileTypes["other"] === true)
+				checked = true;
+
+			if (checked && (filter.query == "" || item.name.indexOf(filter.query) != -1))
 			{
 				result.push(item);
 			}
