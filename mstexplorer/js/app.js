@@ -16,6 +16,33 @@
 
 		var reader = new MSTReader();
 
+		function loadFilesArray(filesArray, callback)
+		{
+			if (filesArray.length > 1)
+			{
+				Materialize.toast("More than one file was selected.", UI.TOAST_LONG, UI.ERROR_CLASS);
+				callback && callback(null, new UIError("More than one file was selected."));
+				return;
+			}
+
+			var file = filesArray[0];
+			reader.load(file, function (files, error)
+			{
+				if (error)
+				{
+					Materialize.toast(error.message, UI.TOAST_LONG, UI.ERROR_CLASS);
+					callback && callback(null, error);
+					return;
+				}
+
+				$scope.files = files;
+				$scope.$apply(); // Update view.
+
+				Materialize.toast("Found " + files.length + " files.", UI.TOAST_SHORT);
+				callback && callback(files);
+			});
+		}
+
 		$("#settingsOpener").leanModal();
 
 		$scope.files = null;
@@ -106,27 +133,7 @@
 			{
 				$(this).removeClass("hover");
 				var dataTransfer = jEvent.originalEvent.dataTransfer;
-
-				if (dataTransfer.files.length > 1)
-				{
-					Materialize.toast("More than one file was selected.", UI.TOAST_LONG, UI.ERROR_CLASS);
-					return;
-				}
-
-				var file = dataTransfer.files[0];
-				reader.load(file, function (files, error)
-				{
-					if (error)
-					{
-						Materialize.toast(error.message, UI.TOAST_LONG, UI.ERROR_CLASS);
-						return;
-					}
-
-					$scope.files = files;
-					$scope.$apply(); // Update view.
-
-					Materialize.toast("Found " + files.length + " files.", UI.TOAST_SHORT);
-				});
+				loadFilesArray(dataTransfer.files);
 			}
 		});
 
@@ -151,6 +158,19 @@
 			}
 
 			$scope.applyFilters();
+		};
+
+		$scope.browseForFile = function ()
+		{
+			var elm = $("#fileBrowser");
+
+			function onChange()
+			{
+				loadFilesArray(elm[0].files);
+			}
+
+			elm.unbind("change").one("change", onChange);
+			elm.click();
 		};
 	}]);
 }();
