@@ -45,18 +45,28 @@
               </div>
             </form>
           </div>
-          <ul id="entrylist" class="collection">
-            <div class="collection-item file" dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage">
-              <span class="file-name">{{file.name}}</span>
-              <span class="secondary-content">{{file.length | friendlySize}}</span>
-            </div>
-            <div class="collection-item" ng-show="files.length == 0">
-              <span>No files found in package.</span>
-            </div>
-            <div class="collection-item" ng-show="filteredFiles.length == 0">
-              <span>No files found with current filters.</span>
-            </div>
-          </ul>
+          <table ng-show="files" id="filesTable" class="bordered hoverable">
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>Filesize</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage">
+                <td>{{file.name}}</td>
+                <td>{{file.length | friendlySize}}</td>
+              </tr>
+              <tr ng-show="files.length == 0">
+                <td class="yellow-text text-darken-4">No files found in package.</td>
+                <td></td>
+              </tr>
+              <tr ng-show="filteredFiles.length == 0">
+                <td class="yellow-text text-darken-4">No files found with current filters.</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
         <dir-pagination-controls template-url="js/libs/pagination/dirPagination.tpl.html"></dir-pagination-controls>
       </div>
     </div>
