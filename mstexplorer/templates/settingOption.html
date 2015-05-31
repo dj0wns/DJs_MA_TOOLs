@@ -3,7 +3,7 @@
 		<span title="{{setting.description}}">{{setting.text}}</span>
 	</td>
 	<td>
-		<div class="value-preview">{{settings[setting.setting]}}</div>
+		<input type="text" class="value-preview transparent" ng-model="settings[setting.setting]" />
         <input type="{{setting.type}}" ng-model="settings[setting.setting]" />
 	</td>
 </tr>

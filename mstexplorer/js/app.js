@@ -1,9 +1,19 @@
 +function()
 {
-	var module = angular.module("maTools", ["angularUtils.directives.dirPagination"]);
+	var module = angular.module("maTools", ["angularUtils.directives.dirPagination", "ngStorage"]);
 
-	module.controller("maTools", ["$scope", function ($scope)
+	module.controller("maTools", ["$scope", "$localStorage", function ($scope, $localStorage)
 	{
+		// Set storage defaults.
+		$localStorage.$default({
+
+			// Default settings
+			settings: {
+				itemsPerPage: 30
+			}
+
+		});
+
 		var reader = new MSTReader();
 
 		$("#settingsOpener").leanModal();
@@ -57,7 +67,7 @@
 		$scope.settingsForm = [
 			{
 				"type": "range", // The element input type.
-				"meta": {min: 10, max: 100, step: 5},
+				"meta": {min: 5, max: 100, step: 5},
 				"class": "validate", // Classes to apply to the input element.
 				"setting": "itemsPerPage", // The setting key in $scope.settings.
 				"text": "Files per page",
@@ -65,9 +75,7 @@
 			}
 		];
 
-		$scope.settings = {
-			itemsPerPage: 30
-		};
+		$scope.settings = $localStorage.settings;
 
 		$scope.search_filename = "";
 		$scope.filter = { query: "", fileTypes: {} };

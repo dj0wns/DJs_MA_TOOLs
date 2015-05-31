@@ -18,6 +18,11 @@ body
   opacity: 0.5;
 }
 
+ul.pagination
+{
+  display: inline-block;
+}
+
 /* Color pagination correctly when order is ul > a > li */
 .pagination a li
 {
@@ -66,4 +71,15 @@ p.file-type-checkbox
 #settingsModal table input
 {
   margin-bottom: 0;
+}
+
+input.transparent
+{
+  border: none;
+  height: 19px;
+}
+
+input.transparent[type*=]:focus
+{
+  border: none;
 }

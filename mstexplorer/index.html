@@ -1,7 +1,7 @@
 <!doctype html>
 <html ng-app="maTools" ng-controller="maTools">
   <head>
-    <title>MA Tools</title>
+    <title>MA Package Explorer</title>
     <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
     <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection"/>
   </head>
@@ -60,7 +60,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage">
+              <tr dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage || 1">
                 <td>{{file.name}}</td>
                 <td>{{file.length | friendlySize}}</td>
               </tr>
@@ -97,6 +97,7 @@
   <script src="js/libs/dragster.js"></script>
   <script src="js/libs/materialize.min.js"></script>
   <script src="js/libs/pagination/dirPagination.js"></script>
+  <script src="js/libs/ngStorage.js"></script>
 
   <script src="js/mstfile.js"></script>
   <script src="js/mstreader.js"></script>
