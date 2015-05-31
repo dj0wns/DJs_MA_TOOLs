@@ -6,6 +6,8 @@
 	{
 		var reader = new MSTReader();
 
+		$("#settingsOpener").leanModal();
+
 		$scope.files = null;
 		$scope.fileTypes =
 		[
@@ -50,6 +52,16 @@
 				"name": "Other",
 				"description": "Other filetypes not yet identified",
 				"checked": true
+			}
+		];
+		$scope.settingsForm = [
+			{
+				"type": "range", // The element input type.
+				"meta": {min: 10, max: 100, step: 5},
+				"class": "validate", // Classes to apply to the input element.
+				"setting": "itemsPerPage", // The setting key in $scope.settings.
+				"text": "Files per page",
+				"description": "The number of files to show per page."
 			}
 		];
 

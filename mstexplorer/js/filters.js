@@ -11,11 +11,11 @@ module.filter("friendlySize", function ()
 		if (input < 1000)
 			return input + " B";
 		if (input < 1000000)
-			return (input / 1000).toFixed(2) + " kB";
+			return (input / 1000).toFixed(2) + " KB";
 		if (input < 1000000000)
-			return (input / 1000000).toFixed(2) + " mB";
+			return (input / 1000000).toFixed(2) + " MB";
 		else
-			return (input / 1000000000).toFixed(2) + " gB";
+			return (input / 1000000000).toFixed(2) + " GB";
 
 	};
 });
