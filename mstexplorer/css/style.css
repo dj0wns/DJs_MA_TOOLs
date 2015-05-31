@@ -57,6 +57,11 @@ p.file-type-checkbox
   min-width: 124px;
 }
 
+#filesTable tr td:nth-child(2)
+{
+  text-align: right;
+}
+
 #settingsModal table input
 {
   margin-bottom: 0;
