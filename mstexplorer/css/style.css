@@ -56,3 +56,8 @@ p.file-type-checkbox
 {
   min-width: 124px;
 }
+
+#settingsModal table input
+{
+  margin-bottom: 0;
+}

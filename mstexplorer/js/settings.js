@@ -16,6 +16,11 @@ module.directive("settingOption", function ()
 			{
 				inputElement.attr(key, setting.meta[key])
 			}
+
+			if (setting.type != "range")
+			{
+				element.find(".value-preview").hide();
+			}
 		}
 	};
 });
