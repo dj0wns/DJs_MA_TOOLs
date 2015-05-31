@@ -61,7 +61,8 @@ MSTReader.prototype._onLoadEntries = function(evt)
     this.entries = [];
     for (var i = 0; i < (this._entryCount - 1) * this._fileStride; i += this._fileStride) {
       var nameBuffer = new Uint8Array(evt.target.result, i, this._fileNameLen);
-      var name = String.fromCharCode.apply(null, nameBuffer).replace(/\0/g, '').trim();
+      var name = String.fromCharCode.apply(null, nameBuffer);
+      name = name.substring(0, name.indexOf("\0")).trim();
 
       var location = view.getUint32(i + this._fileNameLen, this._littleEndian);
       var length = view.getUint32(i + this._fileNameLen + 4, this._littleEndian);
