@@ -5,12 +5,13 @@ body
 
 #dropzone
 {
-  border: 5px dashed rgba(255, 255, 255, 0.3);
-  border-radius: 5px;
   width: 700px;
   height: 200px;
+  margin-top: 25px;
   margin-left: auto;
   margin-right: auto;
+  color: #000;
+  display: block;
 }
 
 #dropzone.hover h5

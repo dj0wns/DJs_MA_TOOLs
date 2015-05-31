@@ -23,11 +23,14 @@
           </ul>
         </div>
         <div id="filestab" class="col s12">
-          <div id="dropzone" class="valign card-panel deep-orange lighten-2" ng-show="!files">
-            <div class="valign-wrapper" style="height:100%">
-              <h5 class="valign center-align" style="width:100%">Drop an .mst file here to browse it.</h5>
+          <input type="file" id="fileBrowser" style="display:none"/>
+          <a href="#" ng-click="browseForFile()">
+            <div id="dropzone" class="valign card-panel grey lighten-4 waves-effect" ng-show="!files">
+              <div class="valign-wrapper" style="height:100%">
+                <h5 class="valign center-align" style="width:100%">Click or drop an .mst file here to browse it.</h5>
+              </div>
             </div>
-          </div>
+          </a>
           <div ng-show="files">
             <form>
               <div id="filters">
@@ -103,6 +106,7 @@
   <script src="js/mstreader.js"></script>
   <script src="js/msterror.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/uierror.js"></script>
   <script src="js/app.js"></script>
   <script src="js/fileFilter.js"></script>
   <script src="js/filters.js"></script>
