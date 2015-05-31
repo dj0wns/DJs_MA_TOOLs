@@ -41,3 +41,13 @@ p.file-type-checkbox
   margin-right: 8px;
   padding: 5px;
 }
+
+#filesTable th:nth-child(1)
+{
+  width: 100%;
+}
+
+#filesTable th:nth-child(2)
+{
+  min-width: 124px;
+}
