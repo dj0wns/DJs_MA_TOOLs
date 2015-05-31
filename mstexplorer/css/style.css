@@ -33,4 +33,11 @@ p.file-type-checkbox
 .file-type-filters
 {
   margin-top: 15px;
+  margin-bottom: 0;
+}
+
+.toggle-filetypes a
+{
+  margin-right: 8px;
+  padding: 5px;
 }

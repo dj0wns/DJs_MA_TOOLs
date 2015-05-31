@@ -112,5 +112,14 @@
 				$scope.filter.fileTypes[fileType.extension] = fileType.checked;
 			}
 		};
+
+		$scope.toggleFiletypeCheckboxes = function (state)
+		{
+			for (var i in $scope.fileTypes)
+			{
+				var fileType = $scope.fileTypes[i];
+				fileType.checked = state;
+			}
+		};
 	}]);
 }();
