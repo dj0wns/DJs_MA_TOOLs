@@ -22,31 +22,28 @@
             </div>
           </div>
           <div ng-show="files">
-            <div id="filters">
-              <div class="row">
-                <div class="col s4 input-field">
-                  <input type="text" id="search_filename" ng-model="search_filename"/>
-                  <label for="search_filename">Filename</label>
-                </div>
-                <div class="col s8">
-                  <div class="row file-type-filters">
-                    <p class="file-type-checkbox" ng-repeat="fileType in fileTypes" title="{{fileType.description}}">
-                      <input type="checkbox" id="fileType_{{fileType.extension}}" ng-model="fileType.checked" />
-                      <label for="fileType_{{fileType.extension}}">{{fileType.name}}</label>
-                    </p>
+            <form>
+              <div id="filters">
+                <div class="row">
+                  <div class="col s4 input-field">
+                    <input type="text" id="search_filename" ng-model="search_filename"/>
+                    <label for="search_filename">Filename</label>
                   </div>
-                  <div class="row toggle-filetypes">
-                    <a class="waves-effect" href="#" ng-click="toggleFiletypeCheckboxes(true)">Check all</a>
-                    <a class="waves-effect" href="#" ng-click="toggleFiletypeCheckboxes(false)">Uncheck all</a>
+                  <div class="col s8">
+                    <div class="row file-type-filters">
+                      <p class="file-type-checkbox" ng-repeat="fileType in fileTypes" title="{{fileType.description}}">
+                        <input type="checkbox" id="fileType_{{fileType.extension}}" ng-model="fileType.checked" ng-change="applyFilters()" />
+                        <label for="fileType_{{fileType.extension}}">{{fileType.name}}</label>
+                      </p>
+                    </div>
+                    <div class="row toggle-filetypes">
+                      <a class="waves-effect" href="#" ng-click="toggleFiletypeCheckboxes(true)">Check all</a>
+                      <a class="waves-effect" href="#" ng-click="toggleFiletypeCheckboxes(false)">Uncheck all</a>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col s1">
-                  <a class="waves-effect waves-light btn-large" id="search_btn" ng-click="applyFilters()">Search</a>
-                </div>
-              </div>
-            </div>
+            </form>
           </div>
           <ul id="entrylist" class="collection">
             <div class="collection-item file" dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage">

@@ -64,6 +64,15 @@
 		for (var i in $scope.fileTypes)
 			$scope.filter.fileTypes[$scope.fileTypes[i].extension.toUpperCase()] = $scope.fileTypes[i].checked;
 
+		// Watch for changes to filename search input and update.
+		$scope.$watch("search_filename", function (newVal, oldVal)
+		{
+			if (newVal == oldVal)
+				return;
+
+			$scope.applyFilters();
+		});
+
 		$("#dropzone").dragster({
 			enter: function (ev)
 			{
@@ -120,6 +129,8 @@
 				var fileType = $scope.fileTypes[i];
 				fileType.checked = state;
 			}
+
+			$scope.applyFilters();
 		};
 	}]);
 }();
