@@ -55,6 +55,7 @@ p.file-type-checkbox
 #filesTable th:nth-child(2)
 {
   min-width: 124px;
+  text-align: right;
 }
 
 #filesTable tr td:nth-child(2)
