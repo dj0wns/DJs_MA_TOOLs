@@ -1,6 +1,6 @@
-function MSTFile(file, name, location, length)
+function MSTFile(mst, name, location, length)
 {
-  this._file = file;
+  this._mst = mst;
   this._fileReader = new FileReader();
   this.name = name;
   this.location = location;
@@ -12,7 +12,7 @@ MSTFile.prototype.load = function(callback)
 {
   this._loadCallback = callback;
 
-  var blob = this._file.slice(this.location, this.location + this.length);
+  var blob = this._mst.file.slice(this.location, this.location + this.length);
   this._fileReader.onloadend = this._onLoadData.bind(this);
   this._fileReader.readAsArrayBuffer(blob);
 }
@@ -23,5 +23,14 @@ MSTFile.prototype._onLoadData = function(evt)
     this._loadCallback(null, new MSTError("Error reading file contents"));
     return;
   }
-  this._loadCallback(evt.target.result, null);
+
+  switch (this.filetype)
+  {
+    case "csv":
+      new CSV().load(this._mst, evt.target.result, this._loadCallback);
+      break;
+
+    default:
+      this._loadCallback(evt.target.result, null);
+  }
 }
