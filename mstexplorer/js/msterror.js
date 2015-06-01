@@ -1,4 +1,4 @@
 function MSTError(message)
 {
-  this.message = message;
+	this.message = message;
 }
