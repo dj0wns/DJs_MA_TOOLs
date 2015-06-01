@@ -63,7 +63,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage || 1">
+							<tr ng-click="previewFile(file)" dir-paginate="file in filteredFiles = (files | fileFilter:filter) | itemsPerPage: settings.itemsPerPage || 1">
 								<td>{{file.name}}</td>
 								<td>{{file.length | friendlySize}}</td>
 							</tr>

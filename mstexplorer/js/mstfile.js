@@ -20,7 +20,7 @@ MSTFile.prototype.load = function(callback)
 MSTFile.prototype._onLoadData = function(evt)
 {
 	if (evt.target.readyState != FileReader.DONE) {
-		this._loadCallback(null, new MSTError("Error reading file contents"));
+		this._loadCallback(null, new MSTError("Error reading file contents."));
 		return;
 	}
 
@@ -31,6 +31,6 @@ MSTFile.prototype._onLoadData = function(evt)
 			break;
 
 		default:
-			this._loadCallback(evt.target.result, null);
+			this._loadCallback(evt.target.result, new MSTError("This file type can't be read yet."));
 	}
 }

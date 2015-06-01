@@ -40,6 +40,7 @@
 
 				Materialize.toast("Found " + files.length + " files.", UI.TOAST_SHORT);
 				callback && callback(files);
+				console.log(files);
 			});
 		}
 
@@ -171,6 +172,20 @@
 
 			elm.unbind("change").one("change", onChange);
 			elm.click();
+		};
+
+		$scope.previewFile = function (file)
+		{
+			file.load(function (data, error)
+			{
+				if (error)
+				{
+					Materialize.toast(error.message, UI.TOAST_LONG, UI.ERROR_CLASS);
+					return;
+				}
+
+				console.log(data);
+			});
 		};
 	}]);
 }();
