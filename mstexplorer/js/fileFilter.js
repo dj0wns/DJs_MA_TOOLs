@@ -25,3 +25,12 @@ angular.module("maTools").filter("fileFilter", function ()
 		return result;
 	};
 })
+
+.filter("rawHtml", ["$sce", function ($sce)
+{
+	return function (input, filter)
+	{
+		console.log(input);
+		return $sce.trustAsHtml(input);
+	};
+}]);

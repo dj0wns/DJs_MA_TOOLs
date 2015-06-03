@@ -47,6 +47,7 @@
 		$("#settingsOpener").leanModal();
 
 		$scope.files = null;
+		$scope.openedFile = null;
 		$scope.fileTypes =
 		[
 			{
@@ -174,7 +175,7 @@
 			elm.click();
 		};
 
-		$scope.previewFile = function (file)
+		$scope.openFile = function (file)
 		{
 			file.load(function (data, error)
 			{
@@ -184,8 +185,41 @@
 					return;
 				}
 
-				console.log(data);
+				switch(file.filetype)
+				{
+					case "csv":
+					{
+						initializeCsv(data);
+						break;
+					}
+				}
+
+				$scope.openedFile = { file: file, data: data };
+				$scope.$apply(); // Apply scope view since this code is called inside the callback function.
+				switchTab("previewtab"); // bug: the tab doesn't show unless you click it with the mouse for some reason.
 			});
+		};
+
+		function switchTab(tab)
+		{
+			$("ul.tabs").tabs("select_tab", tab);
+		}
+
+		// Sets up the preview page with data from the file.
+		function initializeCsv (file)
+		{
+			// Destroy previous editor if any.
+			if ($scope.currentCsvEditor)
+				$scope.currentCsvEditor.destroy();
+
+			var data = file.toHandsOnFormat();
+			var containerElement = $("#csv-preview")[0];
+			var table = new Handsontable(containerElement, {
+				data: data,
+				colHeaders: true
+			});
+
+			$scope.currentCsvEditor = table;
 		};
 	}]);
 }();

@@ -89,3 +89,22 @@ input.transparent[type*=]:focus
 {
 	border: none;
 }
+
+body > .container
+{
+	max-width: 1600px;
+}
+
+#csv-preview
+{
+	min-width: 1400px;
+	overflow-x: auto;
+}
+
+/*
+	Bold text on the first column in a csv table.
+*/
+.handsontable table.htCore tr td:first-of-type
+{
+	font-weight: bold;
+}

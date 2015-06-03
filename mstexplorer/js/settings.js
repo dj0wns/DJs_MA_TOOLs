@@ -1,26 +1,29 @@
-var module = angular.module("maTools");
-
-module.directive("settingOption", function ()
++function ()
 {
-	return {
-		restrict: "A",
-		replace: true,
-		templateUrl: "templates/settingOption.html",
-		link: function (scope, elements)
-		{
-			var element = $(elements[0]);
-			var inputElement = element.find("input");
-			var setting = scope.setting;
+	var module = angular.module("maTools");
 
-			for(var key in setting.meta)
+	module.directive("settingOption", function ()
+	{
+		return {
+			restrict: "A",
+			replace: true,
+			templateUrl: "templates/settingOption.html",
+			link: function (scope, elements)
 			{
-				inputElement.attr(key, setting.meta[key])
-			}
+				var element = $(elements[0]);
+				var inputElement = element.find("input");
+				var setting = scope.setting;
 
-			if (setting.type != "range")
-			{
-				element.find(".value-preview").hide();
+				for(var key in setting.meta)
+				{
+					inputElement.attr(key, setting.meta[key])
+				}
+
+				if (setting.type != "range")
+				{
+					element.find(".value-preview").hide();
+				}
 			}
-		}
-	};
-});
+		};
+	});
+}();

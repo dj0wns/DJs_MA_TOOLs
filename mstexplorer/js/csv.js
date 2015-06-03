@@ -1,6 +1,7 @@
 function CSV()
 {
 	this.entries = null;
+  this._handsonEntries = null;
 }
 
 CSV.prototype.load = function(mst, buffer, callback)
@@ -73,3 +74,44 @@ CSV.prototype.load = function(mst, buffer, callback)
 
 	callback(this, null);
 }
+
+// Convert array data to the format the handsontable library uses.
+CSV.prototype.toHandsOnFormat = function ()
+{
+	if (this._handsonEntries)
+		return this._handsonEntries;
+
+	var result = [];
+	var entries = this.entries.sort(function (a, b) { return a.index - b.index; });
+	
+	for (var i in entries)
+	{
+		var row = entries[i];
+		var resultRow = [];
+		resultRow.push(row.key);
+
+		for (var j in row.values)
+		{
+			var column = row.values[j];
+
+			switch(column.type)
+			{
+				case "pair":
+				{
+					resultRow.push(column.value.join(", "));
+					break;
+				}
+				default:
+				{
+					resultRow.push(column.value.toString());
+					break;
+				}
+			}
+		}
+
+		result.push(resultRow);
+	}
+
+	this._handsonEntries = result;
+	return result;
+};
