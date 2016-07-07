@@ -1,4 +1,5 @@
-function MSTError(message)
-{
-	this.message = message;
+export default class MSTError {
+    constructor(message) {
+        this.message = message;
+    }
 }

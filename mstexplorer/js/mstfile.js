@@ -1,36 +1,36 @@
-function MSTFile(mst, name, location, length)
-{
-	this._mst = mst;
-	this._fileReader = new FileReader();
-	this.name = name;
-	this.location = location;
-	this.length = length;
-	this.filetype = name.substring(name.indexOf(".") + 1).trim();
-}
+import MSTError from './msterror';
 
-MSTFile.prototype.load = function(callback)
-{
-	this._loadCallback = callback;
+export default class MSTFile {
+    constructor(mst, name, location, length) {
+        this._mst = mst;
+        this._fileReader = new FileReader();
+        this.name = name;
+        this.location = location;
+        this.length = length;
+        this.filetype = name.substring(name.indexOf(".") + 1).trim();
+    }
 
-	var blob = this._mst.file.slice(this.location, this.location + this.length);
-	this._fileReader.onloadend = this._onLoadData.bind(this);
-	this._fileReader.readAsArrayBuffer(blob);
-}
+    load(callback) {
+        this._loadCallback = callback;
 
-MSTFile.prototype._onLoadData = function(evt)
-{
-	if (evt.target.readyState != FileReader.DONE) {
-		this._loadCallback(null, new MSTError("Error reading file contents."));
-		return;
-	}
+        var blob = this._mst.file.slice(this.location, this.location + this.length);
+        this._fileReader.onloadend = this._onLoadData;
+        this._fileReader.readAsArrayBuffer(blob);
+    }
 
-	switch (this.filetype)
-	{
-		case "csv":
-			new CSV().load(this._mst, evt.target.result, this._loadCallback);
-			break;
+    _onLoadData = evt => {
+        if (evt.target.readyState != FileReader.DONE) {
+            this._loadCallback(null, new MSTError("Error reading file contents."));
+            return;
+        }
 
-		default:
-			this._loadCallback(evt.target.result, new MSTError("This file type can't be read yet."));
-	}
+        switch (this.filetype) {
+            case "csv":
+                new CSV().load(this._mst, evt.target.result, this._loadCallback);
+                break;
+
+            default:
+                this._loadCallback(evt.target.result, new MSTError("This file type can't be read yet."));
+        }
+    }
 }

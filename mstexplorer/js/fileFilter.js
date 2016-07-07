@@ -1,36 +1,32 @@
-angular.module("maTools").filter("fileFilter", function ()
-{
-	return function(items, filter)
-	{
-		if (items == null)
-			return items;
+angular.module("maTools").filter("fileFilter", () => {
+    return (items, filter) => {
+        if (items == null) {
+            return items;
+        }
 
-		var result = [];
+        const result = [];
 
-		for(var i = 0; i < items.length; ++i)
-		{
-			var item = items[i];
-			var extension = item.filetype.toUpperCase();
-			var checked = filter.fileTypes[extension];
+        for(let i = 0; i < items.length; ++i) {
+            const item = items[i];
+            const extension = item.filetype.toUpperCase();
+            let checked = filter.fileTypes[extension];
 
-			if (checked == undefined && filter.fileTypes["other"] === true)
-				checked = true;
+            if (checked == undefined && filter.fileTypes["other"] === true) {
+                checked = true;
+            }
 
-			if (checked && (filter.query == "" || item.name.indexOf(filter.query) != -1))
-			{
-				result.push(item);
-			}
-		}
+            if (checked && (filter.query == "" || item.name.indexOf(filter.query) != -1)) {
+                result.push(item);
+            }
+        }
 
-		return result;
-	};
+        return result;
+    };
 })
 
-.filter("rawHtml", ["$sce", function ($sce)
-{
-	return function (input, filter)
-	{
-		console.log(input);
-		return $sce.trustAsHtml(input);
-	};
+.filter("rawHtml", ["$sce", ($sce) => {
+    return (input, filter) => {
+        console.log(input);
+        return $sce.trustAsHtml(input);
+    };
 }]);

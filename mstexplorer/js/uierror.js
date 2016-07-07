@@ -1,4 +1,5 @@
-function UIError(message)
-{
-	this.message = message;
+export default class UIError {
+    constructor(message) {
+        this.message = message;
+    }
 }
