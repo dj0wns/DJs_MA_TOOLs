@@ -1,4 +1,5 @@
 import MSTError from './msterror';
+import CSV from './csv';
 
 export default class MSTFile {
     constructor(mst, name, location, length) {
