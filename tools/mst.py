@@ -16,9 +16,12 @@ class MST:
         self.platform = None
         self.package_size = 0
         self.file_count = 0
-        self.prefix_unknown = 0
+        self.unknown_bitmask = 0
         self.suffix_unknowns = []
         self.files = []
+
+    def __repr__(self):
+        return 'MST({}, {} bytes, {} files)'.format(self.platform, self.package_size, self.file_count)
 
     def read(self, reader: BinaryIO):
         header = reader.read_str(4)  # FANG
@@ -26,16 +29,16 @@ class MST:
             reader.little_endian = True
         elif header == 'GNAF':
             reader.little_endian = False
-            reader.platform = GamePlatform.gamecube
+            self.platform = GamePlatform.gamecube
         else:
             raise ProtocolException()
 
-        unknown, self.package_size, self.file_count = reader.read_fmt('III')
-        suffix_unknowns = reader.read_fmt('I' * 23)
+        self.unknown_bitmask, self.package_size, self.file_count = reader.read_fmt('III')
+        self.suffix_unknowns = reader.read_fmt('I' * 23)
 
         if reader.little_endian:
             # no idea what this is, but seems to be 3 in PS2 builds, 2 in Xbox & GC
-            platform_id = suffix_unknowns[14]
+            platform_id = self.suffix_unknowns[14]
             if platform_id == 3:
                 self.platform = GamePlatform.playstation
             elif platform_id == 2:
