@@ -1,18 +1,19 @@
 class Loader:
     def __init__(self, entry):
         self.entry = entry
+        self.data = None
 
-    def export(self, handle, reader):
+    def read(self, reader):
         reader.seek(self.entry.location)
+        self.data = reader.handle.read(self.entry.length)
 
-        # kind of like shutil.copyfileobj, but doesn't copy the entire damn stream
-        bytes_to_read = self.entry.length
+    def write(self, writer):
+        self.entry.location = writer.tell()
+        writer.handle.write(self.data)
+        self.entry.length = writer.tell() - self.entry.location
 
-        buffer_size = 16 * 1024
-        while bytes_to_read > 0:
-            if bytes_to_read > buffer_size:
-                handle.write(reader.handle.read(buffer_size))
-                bytes_to_read -= buffer_size
-            else:
-                handle.write(reader.handle.read(bytes_to_read))
-                bytes_to_read = 0
+    def save(self, handle):
+        handle.write(self.data)
+
+    def load(self, handle):
+        self.data = handle.read()

@@ -18,13 +18,16 @@ def extract(mst_path, out_path, ignore_existing):
 
     for file in mst.files:
         file_out_path = os.path.join(out_path, file.name)
+        file_out_path = file_out_path.replace('.tga', '.dds')
+
         if os.path.isfile(file_out_path) and ignore_existing:
             print('Skipping {0.name}'.format(file))
             continue
 
         print('Writing {0.name} ({0.length} bytes) loader: {0.loader}'.format(file))
         out_handle = open(file_out_path, 'wb')
-        file.loader.export(out_handle, br)
+        file.loader.read(br)
+        file.loader.save(out_handle)
 
 
 if __name__ == '__main__':

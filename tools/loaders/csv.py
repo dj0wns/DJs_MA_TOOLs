@@ -19,7 +19,7 @@ ex:
 
 
 class CSVLoader(Loader):
-    def export(self, handle, reader):
+    def read(self, reader):
         reader.seek(self.entry.location)
 
         file_length, entry_count, entry_offset, when = reader.read_fmt('IIII')
@@ -61,4 +61,10 @@ class CSVLoader(Loader):
 
             out_dict[key] = values
 
-        handle.write(json.dumps(out_dict).encode())
+        self.data = out_dict
+
+    def save(self, handle):
+        handle.write(json.dumps(self.data).encode())
+
+    def reimport(self, handle):
+        self.data = json.loads(handle.read().decode())
