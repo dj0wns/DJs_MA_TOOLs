@@ -31,7 +31,7 @@ class Header:
     for item in self.data:
       print(item + " : " + str(self.data[item]))
 
-  def write_body_files(self,writer,filename):
+  def write_body_files(self,writer,filename,end_of_ape):
     folder = os.path.join(py_path, filename)
     if os.path.isdir(folder) : 
       #Placeholder to do nothing, should delete all files
@@ -46,6 +46,15 @@ class Header:
     f = open(out_file, 'wb')
     f.write(file_bytes)
     f.close()
+   
+    #write First_Part_Suffix
+    writer.seek(end_of_apes, os.SEEK_SET)
+    file_bytes = writer.read(self.data['start_of_second_part'] - end_of_apes)
+    out_file = os.path.join(folder,"First_Part_Suffix")
+    f = open(out_file, 'wb')
+    f.write(file_bytes)
+    f.close()
+
 
     #write part 2
     writer.seek(self.data['start_of_second_part'], os.SEEK_SET)
@@ -55,7 +64,7 @@ class Header:
     f.write(file_bytes)
     f.close()
     
-    #write part 2
+    #write part 3
     writer.seek(self.data['start_of_third_part'], os.SEEK_SET)
     file_bytes = writer.read(self.data['size_of_third_part'])
     out_file = os.path.join(folder,"Third_Part")
@@ -63,7 +72,7 @@ class Header:
     f.write(file_bytes)
     f.close()
     
-    #write part 2
+    #write part 4
     writer.seek(self.data['start_of_fourth_part'], os.SEEK_SET)
     file_bytes = writer.read(self.data['size_of_fourth_part'])
     out_file = os.path.join(folder,"Fourth_Part")
@@ -117,6 +126,8 @@ class Items:
       f.close()
       #increment counter
       i = i + 1
+   
+    return writer.tell()
 
 class Item:
   def __init__(self, writer, offset, length):
@@ -153,8 +164,8 @@ if __name__ == '__main__':
   items = Items(writer, header)
   items.print_items()
 
-  items.write_items(writer,filename)
-  header.write_body_files(writer,filename)
+  end_of_apes = items.write_items(writer,filename)
+  header.write_body_files(writer,filename,end_of_apes)
 
   kv = next(iter(items.data.items()))
   
