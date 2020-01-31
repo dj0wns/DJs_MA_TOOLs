@@ -3,6 +3,8 @@ import os
 import shutil
 import struct
 import math
+import json
+import jsonpickle
 
 endian='little'
 float_endian = '<f'
@@ -11,6 +13,8 @@ short_endian = '<h'
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
+#update to give a user specified path
+out_path = os.path.join(py_path, "out")
 
 shape_list = ["FWORLD_SHAPETYPE_POINT",
   "FWORLD_SHAPETYPE_LINE",
@@ -47,6 +51,90 @@ def roundup(x):
 
 def roundup_4(x):
   return int(math.ceil(x / 4.0)) * 4
+
+def pretty_json(string):
+  return json.dumps(json.loads(string), indent=4, sort_keys=False)
+
+def pretty_pickle_json(to_pack):
+  encoded = jsonpickle.encode(to_pack)
+  return pretty_json(encoded)
+
+def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list):
+  out_bytes = pre_init_data
+  out_bytes += initHeader.to_bytes()
+
+  # shape table before other values
+  for item in init_shape_game_data_list:
+    out_bytes += item[0].to_bytes()
+  
+  mesh_name_locations_dict = {} #used so mesh name strings are only used once to match implementation
+  
+  for item in init_shape_game_data_list:
+    #if its a mesh then data is before the shape other wise reverse it
+    if item[1].shape_type == "FWORLD_SHAPETYPE_MESH":
+      if item[2] is not None:
+        out_bytes += item[2].to_bytes()
+      #make sure to align
+      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict)
+      if new_bytes is not None:
+        out_bytes += new_bytes
+      #always align
+      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
+    else:
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict)
+      if new_bytes is not None:
+        out_bytes += new_bytes
+      #always align
+      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
+      if item[2] is not None:
+        out_bytes += item[2].to_bytes()
+      #make sure to align
+      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
+
+  outfile = open(path+".temp", "wb")
+  outfile.write(out_bytes)
+
+
+#this takes all values and makes a folder and sticks them in it
+def extract_to_file(pre_init_data, header, init_header, init_shape_game_data_list):
+  
+  os.mkdir(out_path)
+
+  preinitdata_file = open(os.path.join(out_path, "preinit.dat"), "wb")
+  preinitdata_file.write(pre_init_data)
+  preinitdata_file.close()
+  
+  header_file = open(os.path.join(out_path, "header.json"), "w")
+  header_file.write(pretty_pickle_json(header))
+  header_file.close()
+
+  init_header_file = open(os.path.join(out_path, "init_header.json"), "w")
+  init_header_file.write(pretty_pickle_json(init_header))
+  init_header_file.close()
+
+  i = 0
+  for item in init_shape_game_data_list:
+    name = "shape" + str(i).zfill(4)
+    init_object_file = open(os.path.join(out_path, name + "_init_object.json"), "w")
+    init_object_file.write(pretty_pickle_json(item[0]))
+    init_object_file.close()
+    
+    if item[1] is not None:
+      shape_file = open(os.path.join(out_path, name + "_shape.json"), "w")
+      shape_file.write(pretty_pickle_json(item[1]))
+      shape_file.close()
+    
+    if item[2] is not None:
+      gamedata_file = open(os.path.join(out_path, name + "_gamedata.json"), "w")
+      gamedata_file.write(item[2].to_json())
+      gamedata_file.close()
+
+    i += 1
+
+
+
+  
 
 class Vector:
   def __init__(self,dimensions=0,x=0,y=0,z=3):
@@ -321,7 +409,6 @@ class ShapeData:
       for i in self.data['array_of_points']:
         byteheader += i.to_bytes()
     elif self.shape_type == "FWORLD_SHAPETYPE_BOX":
-      print("Moo")
       byteheader = struct.pack(float_endian, self.data['x'])
       byteheader += struct.pack(float_endian, self.data['y'])
       byteheader += struct.pack(float_endian, self.data['z'])
@@ -418,10 +505,24 @@ class GameDataHeader:
         elif field.data['data_type'] == "WIDESTRING":
           new_bytes = bytearray(field.data['widestring'])
           new_bytes.append(0x0)
-          byteheader += new_bytes
-    
+          byteheader += new_bytes   
     return byteheader
 
+  def to_json(self):
+    json_dict = self.data
+    for item in self.tables:
+      fields_list = []
+      for field in item.fields:
+        if field.data['data_type'] == "STRING":
+          fields_list.append(field.data['string'].decode())
+        elif field.data['data_type'] == "WIDESTRING":
+          fields_list.append(field.data['widestring'].decode('utf-16-le'))
+        else:
+          fields_list.append(field.data['float'])
+        
+      json_dict[item.data['keystring'].decode()] = fields_list
+    return pretty_json(json.dumps(json_dict))
+    
 
 class GameDataTable:
   def __init__(self, writer, data_offset, header_offset):
@@ -582,7 +683,7 @@ if __name__ == '__main__':
   initHeader.print_header()
 
   init_object_list = []
-  shape_game_data_list = []
+  init_shape_game_data_list = [] #all the init entries and shapes and game datas refer to the same thing
   for item in range(initHeader.data['item_count']):
     init_object_list.append(InitObject(writer,header.data['offset_of_inits']))
 
@@ -595,50 +696,19 @@ if __name__ == '__main__':
       #add offset of init header table + size of init header
       offset = item.data['pointer_to_game_data'] + header.data['offset_of_inits'] + 16  #16 byte header
       gamedata = GameDataHeader(writer,offset)
-    shape_game_data_list.append([shape, gamedata])
+    init_shape_game_data_list.append([item, shape, gamedata])
     item.print_init()
   
-  for item in shape_game_data_list:
-    item[0].pretty_print()
-    if item[1] is not None:
-      item[1].pretty_print()
-  print("num inits: " + str(len(init_object_list)))
-  print("num shape objects: " + str(len(shape_game_data_list)))
+  for item in init_shape_game_data_list:
+    item[1].pretty_print()
+    if item[2] is not None:
+      item[2].pretty_print()
+  print("num shape objects: " + str(len(init_shape_game_data_list)))
 
 
   #rebuild the init section by copying everything else then adding new inits
   writer.seek(0)
-  out_bytes = bytearray(writer.read(header.data['offset_of_inits']))
+  pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
   
-  out_bytes += initHeader.to_bytes()
-
-  for item in init_object_list:
-    out_bytes += item.to_bytes()
-  
-  mesh_name_locations_dict = {} #used so mesh name strings are only used once to match implementation
-  
-  for item in shape_game_data_list:
-    #if its a mesh then data is before the shape other wise reverse it
-    if item[0].shape_type == "FWORLD_SHAPETYPE_MESH":
-      if item[1] is not None:
-        out_bytes += item[1].to_bytes()
-      #make sure to align
-      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
-      new_bytes = item[0].to_bytes(mesh_name_locations_dict)
-      if new_bytes is not None:
-        out_bytes += new_bytes
-      #always align
-      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
-    else:
-      new_bytes = item[0].to_bytes(mesh_name_locations_dict)
-      if new_bytes is not None:
-        out_bytes += new_bytes
-      #always align
-      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
-      if item[1] is not None:
-        out_bytes += item[1].to_bytes()
-      #make sure to align
-      out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
-
-  outfile = open(path+".temp", "wb")
-  outfile.write(out_bytes)
+  build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list)
+  extract_to_file(pre_init_data, header, initHeader, init_shape_game_data_list)
