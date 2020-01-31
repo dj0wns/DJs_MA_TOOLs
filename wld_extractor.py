@@ -6,6 +6,8 @@ import math
 import json
 import jsonpickle
 
+#Notes - generates an outfile twice so it can easily fix offsets without having to keep track of where things are
+
 endian='little'
 float_endian = '<f'
 int_endian = '<i'
@@ -46,6 +48,10 @@ csv_datavalue = {
   "WIDESTRING" : 2,
   "COUNT" : 3}
 
+# for building elements without constructor - probably should have written my constructors different but it is what it is
+class Empty(object):
+  pass
+
 def roundup(x):
   return int(math.ceil(x / 16.0)) * 16
 
@@ -53,14 +59,54 @@ def roundup_4(x):
   return int(math.ceil(x / 4.0)) * 4
 
 def pretty_json(string):
-  return json.dumps(json.loads(string), indent=4, sort_keys=False)
+  dump = json.dumps(json.loads(string), indent=4, sort_keys=False)
+  #print(str(dump))
+  return dump
 
 def pretty_pickle_json(to_pack):
   encoded = jsonpickle.encode(to_pack)
   return pretty_json(encoded)
 
-def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list):
-  out_bytes = pre_init_data
+def print_classes(header, initHeader, init_shape_game_data_list):
+  header.print_header()
+  initHeader.print_header()
+  for item in init_shape_game_data_list:
+    item[0].print_init()
+    item[1].pretty_print()
+    if item[2] is not None:
+      item[2].pretty_print()
+
+
+  print("num shape objects: " + str(len(init_shape_game_data_list)))
+
+def parse_wld_file(writer):
+
+  header = Header(writer)
+  
+  initHeader = InitHeader(writer,header.data['offset_of_inits'])
+
+  init_object_list = []
+  init_shape_game_data_list = [] #all the init entries and shapes and game datas refer to the same thing
+  for item in range(initHeader.data['item_count']):
+    init_object_list.append(InitObject(writer,header.data['offset_of_inits']))
+
+  for item in init_object_list:
+    #add offset of init header table + size of init header
+    offset = item.data['shape_offset'] + header.data['offset_of_inits'] + 16  #16 byte header
+    shape = ShapeData(writer,offset,item.data['shape_type'], header.data['offset_of_inits'] + 16)
+    gamedata = None
+    if item.data['pointer_to_game_data'] > 0:
+      #add offset of init header table + size of init header
+      offset = item.data['pointer_to_game_data'] + header.data['offset_of_inits'] + 16  #16 byte header
+      gamedata = GameDataHeader(writer,offset)
+    init_shape_game_data_list.append([item, shape, gamedata])
+  
+  return header, initHeader, init_shape_game_data_list
+
+def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, start_of_inits):
+  #rebuild the init section by copying everything else then adding new inits
+  
+  out_bytes = pre_init_data[:]
   out_bytes += initHeader.to_bytes()
 
   # shape table before other values
@@ -73,31 +119,99 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list):
     #if its a mesh then data is before the shape other wise reverse it
     if item[1].shape_type == "FWORLD_SHAPETYPE_MESH":
       if item[2] is not None:
-        out_bytes += item[2].to_bytes()
+        #go back and update the shape index as to where you are
+        init_relative_offset = len(out_bytes) - start_of_inits
+        item[0].data['pointer_to_game_data'] = init_relative_offset
+        out_bytes += item[2].to_bytes(init_relative_offset)
       #make sure to align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
-      new_bytes = item[1].to_bytes(mesh_name_locations_dict)
+      #go back and update the shape index as to where you are
+      init_relative_offset = len(out_bytes) - start_of_inits
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict, init_relative_offset)
       if new_bytes is not None:
+        item[0].data['shape_offset'] = init_relative_offset
         out_bytes += new_bytes
       #always align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
     else:
-      new_bytes = item[1].to_bytes(mesh_name_locations_dict)
+      #go back and update the shape index as to where you are
+      init_relative_offset = len(out_bytes) - start_of_inits
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict, init_relative_offset)
       if new_bytes is not None:
+        item[0].data['shape_offset'] = init_relative_offset
         out_bytes += new_bytes
       #always align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
       if item[2] is not None:
-        out_bytes += item[2].to_bytes()
+        #go back and update the shape index as to where you are
+        init_relative_offset = len(out_bytes) - start_of_inits
+        item[0].data['pointer_to_game_data'] = init_relative_offset
+        out_bytes += item[2].to_bytes(init_relative_offset)
       #make sure to align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
 
   outfile = open(path+".temp", "wb")
   outfile.write(out_bytes)
+  outfile.close()
 
+class init_shape_game_data:
+  def __init__(self):
+    self.init = None
+    self.gamedata = None
+    self.shape = None
+  def set_init(self, init):
+    self.init = init
+  def set_gamedata(self, gamedata):
+    self.gamedata = gamedata
+  def set_shape(self, shape):
+    self.shape = shape
+
+def import_from_folder(directory): 
+  init_shape_game_data_dict = {}
+  init_shape_game_data_list = []
+  for filename in os.listdir(directory):
+    filepath = os.path.join(directory, filename)
+    if filename == "preinit.dat":
+      preinit = open(filepath, "rb").read()
+    elif filename == "header.json":
+      header_packed = open(filepath, "rb").read()
+      header = jsonpickle.decode(header_packed)
+    elif filename == "init_header.json":
+      init_header_packed = open(filepath, "rb").read()
+      init_header = jsonpickle.decode(init_header_packed)
+    elif "_init_object." in filename:
+      init_object_packed = open(filepath, "rb").read()
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_init(jsonpickle.decode(init_object_packed))
+      
+    elif "_shape." in filename:
+      shape_packed = open(filepath, "rb").read()
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_shape(jsonpickle.decode(shape_packed))
+    elif "_gamedata." in filename:
+      gamedata = Empty()
+      gamedata.__class__ = GameDataHeader
+      gamedata_json = open(filepath, "r").read()
+      gamedata.from_json(gamedata_json)
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_gamedata(gamedata)
+      
+  #set dict to list form - should have used a dict earlier but dont want to rewrite it
+  #sort the keys
+  for key in sorted(init_shape_game_data_dict):
+    init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata])
+
+
+  return preinit, header, init_header, init_shape_game_data_list
 
 #this takes all values and makes a folder and sticks them in it
-def extract_to_file(pre_init_data, header, init_header, init_shape_game_data_list):
+def extract_to_file(writer, header, init_header, init_shape_game_data_list):
+  #rebuild the init section by copying everything else then adding new inits
+  writer.seek(0)
+  pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
   
   os.mkdir(out_path)
 
@@ -132,10 +246,6 @@ def extract_to_file(pre_init_data, header, init_header, init_shape_game_data_lis
 
     i += 1
 
-
-
-  
-
 class Vector:
   def __init__(self,dimensions=0,x=0,y=0,z=3):
     self.dimensions = dimensions
@@ -154,7 +264,6 @@ class Vector:
     raw += struct.pack(float_endian, self.y)
     raw += struct.pack(float_endian, self.z)
     return raw
-    
     
 
 class Mesh:
@@ -196,12 +305,15 @@ class Mesh:
     print("Color Stream Count: " + str(self.color_stream_count))
     print("Color Streams: " + str(self.color_stream_offset))
 
-  def to_bytes(self, string_dict):
+  def to_bytes(self, string_dict, init_relative_offset):
+    # update mesh offset
     if self.mesh_name in string_dict: # If this mesh name already exists link to it
-      raw = struct.pack(int_endian, string_dict[self.mesh_name])
+      self.mesh_offset = string_dict[self.mesh_name]
     else:
-      #TODO update to use actual position
-      raw = struct.pack(int_endian, self.mesh_offset)
+      #add init size to offset because string is right after
+      self.mesh_offset = init_relative_offset + len(self.lightmap_offsets) * 6 + 32 
+      
+    raw = struct.pack(int_endian, self.mesh_offset)
     for i in self.lightmap_offsets:
       raw += struct.pack(int_endian, i)
     for i in self.lightmap_motifs:
@@ -213,16 +325,12 @@ class Mesh:
     raw += struct.pack(int_endian, self.color_stream_offset)
     #append the mesh name if it doesnt exist yet
     if self.mesh_name not in string_dict:
-      #TODO add the proper offset
       string_dict[self.mesh_name] = self.mesh_offset
       new_bytes = bytearray(self.mesh_name.encode('ascii'))
       #add a null byte
       new_bytes.append(0x0)
       raw += new_bytes
     return raw
-
-    
-
 
 class Header:
   #Dictionary where key is name and value is value
@@ -397,7 +505,7 @@ class ShapeData:
       for item in self.data:
         print(item + " : "  + str(self.data[item]))
 
-  def to_bytes(self, string_dict):
+  def to_bytes(self, string_dict, init_relative_offset):
     if self.shape_type == "FWORLD_SHAPETYPE_POINT":
       byteheader = None
     elif self.shape_type == "FWORLD_SHAPETYPE_LINE":
@@ -418,7 +526,7 @@ class ShapeData:
       byteheader = struct.pack(float_endian, self.data['radius'])
       byteheader += struct.pack(float_endian, self.data['y'])
     elif self.shape_type == "FWORLD_SHAPETYPE_MESH":
-      byteheader = self.data['mesh'].to_bytes(string_dict)
+      byteheader = self.data['mesh'].to_bytes(string_dict, init_relative_offset)
     elif self.shape_type == "FWORLD_SHAPETYPE_COUNT":
       byteheader = None
     return byteheader
@@ -471,7 +579,7 @@ class GameDataHeader:
       size += table.size()
     return size;
 
-  def to_bytes(self):
+  def to_bytes(self, init_relative_offset):
     #returns a byte array that can be lopped in with the other csv's
     #byteheader = struct.pack(int_endian, 0x3c23e147) #seems to be some special csv header magic number - SEEMS FALSE AS FUCK
     byteheader = struct.pack(int_endian, self.size())
@@ -480,6 +588,7 @@ class GameDataHeader:
     byteheader += struct.pack(int_endian, self.data['flags'])
     offset = (len(self.tables) * 16) + 16 #keystring headers are 16 bytes
     table_offset = offset #used to find the offset of the data part within a table's fields
+    self.data['pointer_to_tables'] = len(byteheader)
     for table in self.tables:
       newheader = table.header_to_bytes(offset)
       byteheader += newheader
@@ -487,15 +596,18 @@ class GameDataHeader:
     #after headers you start pasting in values - not sure where the strings are kept yet
     for table in self.tables:
       #add keystrings
+      table.data['keystring_pointer'] = len(byteheader)
       newbytes, size = table.keystring_to_bytes()
       byteheader += newbytes
       table_offset += size + len(table.fields) * 12 #data(strings) come after the keystring + fields
+      table.data['field_offset'] = len(byteheader)
       #add fields
       for field in table.fields:
         new_bytes = field.to_bytes(table_offset)
         if field.data['string_length'] > 0:
           table_offset += field.data['string_length'] + 1 #add extra ending null byte!
         byteheader += new_bytes
+        field.data['string_pointer'] = len(byteheader)
       #add field strings
       for field in table.fields:
         if field.data['data_type'] == "STRING":
@@ -514,20 +626,76 @@ class GameDataHeader:
       fields_list = []
       for field in item.fields:
         if field.data['data_type'] == "STRING":
-          fields_list.append(field.data['string'].decode())
+          fields_list.append(field.data['string'].decode('ascii'))
         elif field.data['data_type'] == "WIDESTRING":
           fields_list.append(field.data['widestring'].decode('utf-16-le'))
         else:
           fields_list.append(field.data['float'])
-        
-      json_dict[item.data['keystring'].decode()] = fields_list
+      # keys are non unique so have to ad an identifier that i can remove later  
+      new_keystring = item.data['keystring'].decode()
+      i=1
+      while new_keystring in json_dict:
+        new_keystring = item.data['keystring'].decode() + "__" + str(i)
+        i += 1
+      json_dict[new_keystring] = fields_list
     return pretty_json(json.dumps(json_dict))
-    
+  
+  def from_json(self, json_str):
+    json_dict = json.loads(json_str)
+    self.data = {}
+    self.tables = []
+    for key, value in json_dict.items():
+      if key == "offset":
+        self.data["offset"] = value #TODO set to 0 for memes?
+      elif key == "size":
+        self.data["size"] = value
+      elif key == "number_of_tables":
+        self.data["number_of_tables"] = value
+      elif key == "pointer_to_tables":
+        self.data["pointer_to_tables"] = value #TODO set to 0 for memes?
+      elif key == "flags":
+        self.data["flags"] = value
+      else:
+        #key is keystring, values is tables
+        datatable = Empty()
+        datatable.__class__ = GameDataTable
+        datatable.data = {}
+        datatable.data['offset'] = 0
+        datatable.data['header_offset'] = 0
+        datatable.data['keystring_pointer'] = 0
+        #remove added text added to nonunique keystrings
+        keystring =key.split("__")[0]
+        datatable.data['keystring'] = keystring.encode('ascii')
+        datatable.data['keystring_length'] = len(keystring)
+        datatable.data['num_fields'] = len(value)
+        datatable.data['table_index'] = len(self.tables)
+        datatable.data['field_offset'] = 0
+
+        fields = []
+        for i in value:
+          field = Empty()
+          field.__class__ = GameDataField
+          field.data = {}
+          field.data['offset'] = 0
+          if type(i) == float or type(i) == int: # if float
+            field.data['data_type'] = "FLOAT"
+            field.data['float'] = float(i)
+            field.data['string_length'] = 0
+            field.data['string_pointer'] = 0
+          else:
+            #Never seen case of widestring used
+            field.data['data_type'] = "STRING"
+            field.data['string_pointer'] = 0
+            field.data['string'] = i.encode('ascii')
+            field.data['string_length'] = len(i)
+          fields.append(field)
+        datatable.fields = fields
+        self.tables.append(datatable)
 
 class GameDataTable:
   def __init__(self, writer, data_offset, header_offset):
     self.data = self.parse(writer, data_offset, header_offset)
-    self.fields = self.parse_fields(writer)
+    self.fields = self.parse_fields(writer, header_offset)
 
   def parse(self, writer, data_offset, header_offset): 
     table = {}
@@ -544,13 +712,13 @@ class GameDataTable:
     table['keystring'] = writer.read(table['keystring_length'])
     return table
   
-  def parse_fields(self, writer):
+  def parse_fields(self, writer, header_offset):
     #save old offset to return
     original_offset = writer.tell()
     fields = []
     writer.seek(self.data['header_offset'] + self.data['field_offset'])
     for i in range(self.data['num_fields']):
-      fields.append(GameDataField(writer))
+      fields.append(GameDataField(writer, header_offset))
     writer.seek(original_offset)
     return fields;
 
@@ -584,6 +752,7 @@ class GameDataTable:
     return byteheader
 
   def keystring_to_bytes(self):
+    #TODO UPDATE KEYSTRING OFFSET HERE
     keystring = bytearray(self.data['keystring'])
     #add additional padding to the string
     size = roundup_4(self.data['keystring_pointer'] + self.data['keystring_length'] + 1) - (self.data['keystring_pointer']); 
@@ -596,10 +765,10 @@ class GameDataTable:
     
 
 class GameDataField:
-  def __init__(self, writer):
-    self.data = self.parse(writer)
+  def __init__(self, writer, header_offset):
+    self.data = self.parse(writer, header_offset)
 
-  def parse(self, writer): 
+  def parse(self, writer, header_offset): 
     entry = {}
     entry['offset'] = writer.tell()
     entry['data_type'] = int.from_bytes(writer.read(4), byteorder=endian, signed=False)
@@ -618,12 +787,12 @@ class GameDataField:
     #add string and dont forget to reset writer
     if entry['data_type'] == "STRING":
       old_offset = writer.tell()
-      writer.seek(offset + entry['string_pointer'])
+      writer.seek(header_offset + entry['string_pointer'])
       entry['string'] = writer.read(entry['string_length'])
       writer.seek(old_offset)
     elif entry['data_type'] == "WIDESTRING": 
       old_offset = writer.tell()
-      writer.seek(entry['offset'] + entry['widestring_pointer'])
+      writer.seek(header_offset + entry['widestring_pointer'])
       entry['widestring'] = writer.read(entry['string_length'])
       writer.seek(old_offset)
     return entry
@@ -635,7 +804,7 @@ class GameDataField:
   
   def data_string(self):
     if self.data['data_type'] == "STRING":
-      return self.data['string'].decode()
+      return self.data['string'].decode('ascii')
     elif self.data['data_type'] == "WIDESTRING":
       return self.data['widestring'].decode('utf-16-le')
     else:
@@ -676,39 +845,14 @@ if __name__ == '__main__':
   basename = os.path.basename(path)
   filename, file_extension = os.path.splitext(basename)
 
-  header = Header(writer)
-  header.print_header()
+  #header, initHeader, init_shape_game_data_list = parse_wld_file(writer)
+  preinit, header, initHeader, init_shape_game_data_list = import_from_folder(out_path)
+
+  #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
+  build_wld_file(path, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
+  build_wld_file(path, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
   
-  initHeader = InitHeader(writer,header.data['offset_of_inits'])
-  initHeader.print_header()
+  print_classes(header, initHeader, init_shape_game_data_list)
 
-  init_object_list = []
-  init_shape_game_data_list = [] #all the init entries and shapes and game datas refer to the same thing
-  for item in range(initHeader.data['item_count']):
-    init_object_list.append(InitObject(writer,header.data['offset_of_inits']))
-
-  for item in init_object_list:
-    #add offset of init header table + size of init header
-    offset = item.data['shape_offset'] + header.data['offset_of_inits'] + 16  #16 byte header
-    shape = ShapeData(writer,offset,item.data['shape_type'], header.data['offset_of_inits'] + 16)
-    gamedata = None
-    if item.data['pointer_to_game_data'] > 0:
-      #add offset of init header table + size of init header
-      offset = item.data['pointer_to_game_data'] + header.data['offset_of_inits'] + 16  #16 byte header
-      gamedata = GameDataHeader(writer,offset)
-    init_shape_game_data_list.append([item, shape, gamedata])
-    item.print_init()
+  #extract_to_file(writer, header, initHeader, init_shape_game_data_list)
   
-  for item in init_shape_game_data_list:
-    item[1].pretty_print()
-    if item[2] is not None:
-      item[2].pretty_print()
-  print("num shape objects: " + str(len(init_shape_game_data_list)))
-
-
-  #rebuild the init section by copying everything else then adding new inits
-  writer.seek(0)
-  pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
-  
-  build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list)
-  extract_to_file(pre_init_data, header, initHeader, init_shape_game_data_list)
