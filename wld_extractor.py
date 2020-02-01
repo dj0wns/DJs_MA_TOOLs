@@ -5,6 +5,7 @@ import struct
 import math
 import json
 import jsonpickle
+import argparse
 
 #Notes - generates an outfile twice so it can easily fix offsets without having to keep track of where things are
 
@@ -15,8 +16,6 @@ short_endian = '<h'
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
-#update to give a user specified path
-out_path = os.path.join(py_path, "out")
 
 shape_list = ["FWORLD_SHAPETYPE_POINT",
   "FWORLD_SHAPETYPE_LINE",
@@ -150,7 +149,7 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, s
       #make sure to align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
 
-  outfile = open(path+".temp", "wb")
+  outfile = open(path, "wb")
   outfile.write(out_bytes)
   outfile.close()
 
@@ -208,7 +207,7 @@ def import_from_folder(directory):
   return preinit, header, init_header, init_shape_game_data_list
 
 #this takes all values and makes a folder and sticks them in it
-def extract_to_file(writer, header, init_header, init_shape_game_data_list):
+def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_list):
   #rebuild the init section by copying everything else then adding new inits
   writer.seek(0)
   pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
@@ -834,25 +833,53 @@ class GameDataField:
     
 
 if __name__ == '__main__':
-  if len(sys.argv) < 2 : 
-    print("Requires a world file as an argument.")
+  parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
+  endian = parser.add_mutually_exclusive_group()
+  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - big endian", action="store_true")
+  endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
+  operation = parser.add_mutually_exclusive_group()
+  operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")
+  operation.add_argument("-r", "--rebuild", help="Rebuild a wld file from a folder full of extracted files", action="store_true")
+  parser.add_argument("-p", "--print", help="Print the structures to stdout", action="store_true")
+  parser.add_argument("input", help="input file or folder")
+  parser.add_argument("output", help="output file or folder")
+  args = parser.parse_args()
+
+  #set endianess - xbox default
+  if args.gamecube:
+    endian='big'
+    float_endian = '>f'
+    int_endian = '>i'
+    short_endian = '>h' 
+  else:
+    endian='little'
+    float_endian = '<f'
+    int_endian = '<i'
+    short_endian = '<h' 
+
+  #get input
+  if args.extract:
+    path = args.input
+    writer = open(path, "rb")
+    header, initHeader, init_shape_game_data_list = parse_wld_file(writer)
+  elif args.rebuild:
+    preinit, header, initHeader, init_shape_game_data_list = import_from_folder(args.input)
+  else:
+    print("Must specify extract or rebuild")
     sys.exit()
+    
 
-  path = sys.argv[1]
-  writer = open(path, "rb")
-
-  #extract name for creating a working folder
-  basename = os.path.basename(path)
-  filename, file_extension = os.path.splitext(basename)
-
-  #header, initHeader, init_shape_game_data_list = parse_wld_file(writer)
-  preinit, header, initHeader, init_shape_game_data_list = import_from_folder(out_path)
-
-  #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
-  build_wld_file(path, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
-  build_wld_file(path, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
+  #print
+  if args.print:
+    print_classes(header, initHeader, init_shape_game_data_list)
+    
   
-  print_classes(header, initHeader, init_shape_game_data_list)
+  if args.extract:
+    extract_to_file(writer, args.output, header, initHeader, init_shape_game_data_list)
+  elif args.rebuild:
+    #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
+    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
+    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
+  
 
-  #extract_to_file(writer, header, initHeader, init_shape_game_data_list)
   
