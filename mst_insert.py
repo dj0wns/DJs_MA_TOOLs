@@ -6,10 +6,12 @@ import glob
 import struct
 import math
 import collections
+import argparse
 
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
+endian = "little"
 pack_int = '<i'
 
 #A dirty file injector for msts
@@ -26,13 +28,23 @@ def add_buffer(writer):
 
 
 if __name__ == '__main__':
-  if len(sys.argv) < 3 :
-    print("Requires a file then an mst as arguments")
-    sys.exit()
+  parser = argparse.ArgumentParser(description="Insert a file into the MST")
+  endian = parser.add_mutually_exclusive_group()
+  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - big endian", action="store_true")
+  endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
+  parser.add_argument("input", help="File to insert into the mst")
+  parser.add_argument("mst", help="The MST")
+  args = parser.parse_args()
+  if args.gamecube:
+    endian='big'
+    pack_int = '>i'
+  else:
+    endian='little'
+    pack_int = '<i'
 
-  insert_file = sys.argv[1]
+  insert_file = args.input
   insert_file_name = os.path.basename(insert_file)
-  mst = sys.argv[2]
+  mst = args.mst
   mst_out = mst + ".new"
   insert_reader = open(insert_file, "rb")
   mst_reader = open(mst, "rb")
@@ -53,10 +65,10 @@ if __name__ == '__main__':
   #read table entry
   mst_reader.seek(idx, os.SEEK_SET)
   original_name = mst_reader.read(20)
-  original_location = int.from_bytes(mst_reader.read(4), "little")
-  original_length = int.from_bytes(mst_reader.read(4), "little")
-  original_timestamp = int.from_bytes(mst_reader.read(4), "little")
-  original_crc = int.from_bytes(mst_reader.read(4), "little")
+  original_location = int.from_bytes(mst_reader.read(4), endian)
+  original_length = int.from_bytes(mst_reader.read(4), endian)
+  original_timestamp = int.from_bytes(mst_reader.read(4), endian)
+  original_crc = int.from_bytes(mst_reader.read(4), endian)
 
   print("Seek: " + str(idx))
   print("Original File: " + str(original_name) + ", location: " + str(original_location) + ", length: " + str(original_length) + ", timestamp: " + str(original_timestamp) + ", crc: " + str(original_crc))
@@ -95,7 +107,7 @@ if __name__ == '__main__':
 
   #update every following files location
   mst_reader.seek(12,os.SEEK_SET)
-  file_count = int.from_bytes(mst_reader.read(4), "little")
+  file_count = int.from_bytes(mst_reader.read(4), endian)
   mst_reader.seek(27 * 4,os.SEEK_SET) # start of toc
   delta = roundup(new_length) - roundup(original_length)
   first = 99999999999
@@ -103,10 +115,10 @@ if __name__ == '__main__':
   for i in range(file_count):
     name = mst_reader.read(20)
     mst_writer.seek(mst_reader.tell())
-    location = int.from_bytes(mst_reader.read(4), "little")
-    length = int.from_bytes(mst_reader.read(4), "little")
-    timestamp = int.from_bytes(mst_reader.read(4), "little")
-    crc = int.from_bytes(mst_reader.read(4), "little")
+    location = int.from_bytes(mst_reader.read(4), endian)
+    length = int.from_bytes(mst_reader.read(4), endian)
+    timestamp = int.from_bytes(mst_reader.read(4), endian)
+    crc = int.from_bytes(mst_reader.read(4), endian)
     #if its a following file
     if location > original_location:
       mst_writer.write(struct.pack(pack_int,location+delta))
@@ -125,10 +137,10 @@ if __name__ == '__main__':
   mst_reader = open(mst_out, "rb")
   mst_reader.seek(idx, os.SEEK_SET)
   name = mst_reader.read(20)
-  location = int.from_bytes(mst_reader.read(4), "little")
-  length = int.from_bytes(mst_reader.read(4), "little")
-  timestamp = int.from_bytes(mst_reader.read(4), "little")
-  crc = int.from_bytes(mst_reader.read(4), "little")
+  location = int.from_bytes(mst_reader.read(4), endian)
+  length = int.from_bytes(mst_reader.read(4), endian)
+  timestamp = int.from_bytes(mst_reader.read(4), endian)
+  crc = int.from_bytes(mst_reader.read(4), endian)
 
   print("New File: " + str(name) + ", location: " + str(location) + ", length: " + str(length) + ", timestamp: " + str(timestamp) + ", crc: " + str(crc))
 
