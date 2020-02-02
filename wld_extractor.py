@@ -215,6 +215,11 @@ def import_from_folder(directory):
       if filename.split("_")[0] not in init_shape_game_data_dict:
         init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
       init_shape_game_data_dict[filename.split("_")[0]].set_shape(jsonpickle.decode(shape_packed))
+      #TODO Remove this hack - just zeroing out the color streams to see what happens and so you can edit campaign levels
+      if init_shape_game_data_dict[filename.split("_")[0]].shape.shape_type == "FWORLD_SHAPETYPE_MESH":
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_count = 0
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_offset = 0
+        
     elif "_gamedata." in filename:
       gamedata = Empty()
       gamedata.__class__ = GameDataHeader
@@ -270,7 +275,7 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
       gamedata_file.close()
 
     i += 1
-
+  
 class Vector:
   def __init__(self,dimensions=0,x=0,y=0,z=3):
     self.dimensions = dimensions
