@@ -215,7 +215,7 @@ def import_from_folder(directory):
       if filename.split("_")[0] not in init_shape_game_data_dict:
         init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
       init_shape_game_data_dict[filename.split("_")[0]].set_shape(jsonpickle.decode(shape_packed))
-      #TODO Remove this hack - just zeroing out the color streams to see what happens and so you can edit campaign levels
+      #TODO Remove this hack - just zeroing out the color streams to see what happens and so you can edit campaign levels - This works with minor color errors so calling it a win until we can parse meshes
       if init_shape_game_data_dict[filename.split("_")[0]].shape.shape_type == "FWORLD_SHAPETYPE_MESH":
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_count = 0
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_offset = 0
