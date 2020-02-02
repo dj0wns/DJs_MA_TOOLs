@@ -102,7 +102,7 @@ def parse_wld_file(writer):
   
   return header, initHeader, init_shape_game_data_list
 
-def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, start_of_inits):
+def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, start_of_inits, lightmap_name_locations_dict):
   #rebuild the init section by copying everything else then adding new inits
   
   out_bytes = pre_init_data[:]
@@ -126,7 +126,7 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, s
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
       #go back and update the shape index as to where you are
       init_relative_offset = len(out_bytes) - start_of_inits
-      new_bytes = item[1].to_bytes(mesh_name_locations_dict, init_relative_offset)
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict, lightmap_name_locations_dict, init_relative_offset)
       if new_bytes is not None:
         item[0].data['shape_offset'] = init_relative_offset
         out_bytes += new_bytes
@@ -135,7 +135,7 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, s
     else:
       #go back and update the shape index as to where you are
       init_relative_offset = len(out_bytes) - start_of_inits
-      new_bytes = item[1].to_bytes(mesh_name_locations_dict, init_relative_offset)
+      new_bytes = item[1].to_bytes(mesh_name_locations_dict, lightmap_name_locations_dict, init_relative_offset)
       if new_bytes is not None:
         item[0].data['shape_offset'] = init_relative_offset
         out_bytes += new_bytes
@@ -148,6 +148,32 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, s
         out_bytes += item[2].to_bytes(init_relative_offset)
       #make sure to align
       out_bytes += bytes(roundup_4(len(out_bytes)) - len(out_bytes))
+
+  out_bytes = bytearray(out_bytes)
+  
+  #add lightmap names at end
+  for key, value in lightmap_name_locations_dict.items():
+    #update value
+    lightmap_name_locations_dict[key] = len(out_bytes) - start_of_inits
+    out_bytes += bytearray(key.encode('ascii'))
+    #add a null byte
+    out_bytes.append(0x0)
+    
+
+  #update file size
+  size_bytes = struct.pack(int_endian, len(out_bytes))
+  for i in range(len(size_bytes)):
+    out_bytes[i] = size_bytes[i]
+
+
+  #update init size
+  init_bytes = bytearray()
+  for i in range(4):
+    init_bytes.append(out_bytes[36+i])
+  init_value = int.from_bytes(init_bytes, byteorder=endian, signed=False)
+  init_size = struct.pack(int_endian, len(out_bytes) - init_value)
+  for i in range(len(init_size)):
+    out_bytes[40+i] = init_size[i]
 
   outfile = open(path, "wb")
   outfile.write(out_bytes)
@@ -203,7 +229,7 @@ def import_from_folder(directory):
   for key in sorted(init_shape_game_data_dict):
     init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata])
 
-
+  init_header.data['item_count'] = len(init_shape_game_data_list)
   return preinit, header, init_header, init_shape_game_data_list
 
 #this takes all values and makes a folder and sticks them in it
@@ -273,14 +299,13 @@ class Mesh:
     writer.seek(mesh_offset + init_offset)
     self.mesh_name = ''.join(iter(lambda: writer.read(1).decode('ascii'), '\x00')) #remove trailing zeroes
 
+    self.lightmap_names = []
     self.lightmap_offsets = lightmap_offsets
-    
-    #TODO get lightmap names from offsets
-   # if lightmap_offsets > 0:
-   #   writer.seek(mesh_offset + init_offset)
-   #   self.lightmap_names = writer.read(12)
-   # else:
-    self.lightmap_names = "N/A"
+    for item in lightmap_offsets:
+      if int(item) > 0:
+        writer.seek(item + init_offset)
+        self.lightmap_names.append(''.join(iter(lambda: writer.read(1).decode('ascii'), '\x00'))) #remove trailing zeroes
+
     
     self.lightmap_motifs = lightmap_motifs
     self.flags = flags
@@ -304,14 +329,23 @@ class Mesh:
     print("Color Stream Count: " + str(self.color_stream_count))
     print("Color Streams: " + str(self.color_stream_offset))
 
-  def to_bytes(self, string_dict, init_relative_offset):
+  def to_bytes(self, string_dict, lightmap_dict, init_relative_offset):
     # update mesh offset
     if self.mesh_name in string_dict: # If this mesh name already exists link to it
       self.mesh_offset = string_dict[self.mesh_name]
     else:
       #add init size to offset because string is right after
       self.mesh_offset = init_relative_offset + len(self.lightmap_offsets) * 6 + 32 
-      
+    
+    for i in range(4):
+      if len(self.lightmap_names) > i and len(self.lightmap_names[i]) > 0:
+        if self.lightmap_names[i] in lightmap_dict:
+          self.lightmap_offsets[i] = lightmap_dict[self.lightmap_names[i]]
+        else:
+          lightmap_dict[self.lightmap_names[i]] = self.lightmap_offsets[i]
+      else:
+        self.lightmap_offsets[i] = 0
+
     raw = struct.pack(int_endian, self.mesh_offset)
     for i in self.lightmap_offsets:
       raw += struct.pack(int_endian, i)
@@ -504,7 +538,7 @@ class ShapeData:
       for item in self.data:
         print(item + " : "  + str(self.data[item]))
 
-  def to_bytes(self, string_dict, init_relative_offset):
+  def to_bytes(self, string_dict, lightmap_dict, init_relative_offset):
     if self.shape_type == "FWORLD_SHAPETYPE_POINT":
       byteheader = None
     elif self.shape_type == "FWORLD_SHAPETYPE_LINE":
@@ -525,7 +559,7 @@ class ShapeData:
       byteheader = struct.pack(float_endian, self.data['radius'])
       byteheader += struct.pack(float_endian, self.data['y'])
     elif self.shape_type == "FWORLD_SHAPETYPE_MESH":
-      byteheader = self.data['mesh'].to_bytes(string_dict, init_relative_offset)
+      byteheader = self.data['mesh'].to_bytes(string_dict, lightmap_dict, init_relative_offset)
     elif self.shape_type == "FWORLD_SHAPETYPE_COUNT":
       byteheader = None
     return byteheader
@@ -751,7 +785,6 @@ class GameDataTable:
     return byteheader
 
   def keystring_to_bytes(self):
-    #TODO UPDATE KEYSTRING OFFSET HERE
     keystring = bytearray(self.data['keystring'])
     #add additional padding to the string
     size = roundup_4(self.data['keystring_pointer'] + self.data['keystring_length'] + 1) - (self.data['keystring_pointer']); 
@@ -877,9 +910,10 @@ if __name__ == '__main__':
   if args.extract:
     extract_to_file(writer, args.output, header, initHeader, init_shape_game_data_list)
   elif args.rebuild:
+    lightmap_name_locations_dict = {}
     #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
-    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
-    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16)
+    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
+    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
   
 
   
