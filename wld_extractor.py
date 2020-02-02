@@ -724,6 +724,7 @@ class GameDataHeader:
           fields.append(field)
         datatable.fields = fields
         self.tables.append(datatable)
+    self.data["number_of_tables"] = len(self.tables)      
 
 class GameDataTable:
   def __init__(self, writer, data_offset, header_offset):
