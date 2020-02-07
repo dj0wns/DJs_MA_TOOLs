@@ -491,6 +491,7 @@ class ShapeData:
       data['closed_spline'] = int.from_bytes(writer.read(4), byteorder=endian, signed=False) #bool to or to not connect the first and last points
       data['vec_list_ptr'] = int.from_bytes(writer.read(4), byteorder=endian, signed=False)
       vec_list = []
+      #TODO FOLLOW THE POINTER TO SEE WHERE THIS ACTUALLY IS
       for i in range(data['point_count']):
         x = struct.unpack(float_endian, writer.read(4))[0]
         y = struct.unpack(float_endian, writer.read(4))[0]
@@ -551,6 +552,7 @@ class ShapeData:
     elif self.shape_type == "FWORLD_SHAPETYPE_SPLINE":
       byteheader = struct.pack(int_endian, self.data['point_count'])
       byteheader += struct.pack(int_endian, self.data['closed_spline'])
+      self.data['vec_list_ptr'] = init_relative_offset + 12 #update pointer to new actual location
       byteheader += struct.pack(int_endian, self.data['vec_list_ptr']) #todo point to the proper data
       for i in self.data['array_of_points']:
         byteheader += i.to_bytes()
