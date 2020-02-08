@@ -30,7 +30,7 @@ def add_buffer(writer):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Insert a file into the MST")
   endian = parser.add_mutually_exclusive_group()
-  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - big endian", action="store_true")
+  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - small endian", action="store_true")
   endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
   parser.add_argument("input", help="File to insert into the mst")
   parser.add_argument("mst", help="The MST")

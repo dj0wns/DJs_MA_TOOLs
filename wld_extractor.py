@@ -876,7 +876,7 @@ class GameDataField:
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
   endian = parser.add_mutually_exclusive_group()
-  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - big endian", action="store_true")
+  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - small endian", action="store_true")
   endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
   operation = parser.add_mutually_exclusive_group()
   operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")

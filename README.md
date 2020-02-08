@@ -20,7 +20,7 @@ positional arguments:
 
 optional arguments:
   -h, --help      show this help message and exit
-  -g, --gamecube  Use gamecube endian - big endian
+  -g, --gamecube  Use gamecube endian - small endian
   -x, --xbox      Use xbox endian - big endian [Default]
 ```
 
@@ -37,7 +37,7 @@ positional arguments:
 
 optional arguments:
   -h, --help      show this help message and exit
-  -g, --gamecube  Use gamecube endian - big endian
+  -g, --gamecube  Use gamecube endian - small endian
   -x, --xbox      Use xbox endian - big endian [Default]
   -e, --extract   Extract the contents of a wld file to a directory
   -r, --rebuild   Rebuild a wld file from a folder full of extracted files
