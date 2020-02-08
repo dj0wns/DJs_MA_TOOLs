@@ -432,18 +432,18 @@ class InitObject:
     header['offset'] = writer.tell()
     header['shape_type'] = shape_list[int.from_bytes(writer.read(4), byteorder=endian, signed=False)]
     header['shape_offset'] = int.from_bytes(writer.read(4), byteorder=endian, signed=False)
-    header['orientation_of_shape1'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape2'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape3'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape4'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape5'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape6'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape7'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape8'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape9'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape10'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape11'] = struct.unpack(float_endian, writer.read(4))[0]
-    header['orientation_of_shape12'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Right_X'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Right_Y'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Right_Z'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Up_X'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Up_Y'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Up_Z'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Front_X'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Front_Y'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Front_Z'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Position_X'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Position_Y'] = struct.unpack(float_endian, writer.read(4))[0]
+    header['Position_Z'] = struct.unpack(float_endian, writer.read(4))[0]
     header['shape_index'] = int.from_bytes(writer.read(4), byteorder=endian, signed=True)
     header['pointer_to_game_data'] = int.from_bytes(writer.read(4), byteorder=endian, signed=True)
     return header
@@ -456,18 +456,18 @@ class InitObject:
   def to_bytes(self):
     byteheader = struct.pack(int_endian, shape_value[self.data['shape_type']])
     byteheader += struct.pack(int_endian, self.data['shape_offset'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape1'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape2'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape3'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape4'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape5'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape6'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape7'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape8'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape9'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape10'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape11'])
-    byteheader += struct.pack(float_endian, self.data['orientation_of_shape12'])
+    byteheader += struct.pack(float_endian, self.data['Right_X'])
+    byteheader += struct.pack(float_endian, self.data['Right_Y'])
+    byteheader += struct.pack(float_endian, self.data['Right_Z'])
+    byteheader += struct.pack(float_endian, self.data['Up_X'])
+    byteheader += struct.pack(float_endian, self.data['Up_Y'])
+    byteheader += struct.pack(float_endian, self.data['Up_Z'])
+    byteheader += struct.pack(float_endian, self.data['Front_X'])
+    byteheader += struct.pack(float_endian, self.data['Front_Y'])
+    byteheader += struct.pack(float_endian, self.data['Front_Z'])
+    byteheader += struct.pack(float_endian, self.data['Position_X'])
+    byteheader += struct.pack(float_endian, self.data['Position_Y'])
+    byteheader += struct.pack(float_endian, self.data['Position_Z'])
     byteheader += struct.pack(int_endian, self.data['shape_index'])
     byteheader += struct.pack(int_endian, self.data['pointer_to_game_data'])
     return byteheader
