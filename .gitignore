@@ -1,0 +1,6 @@
+__pycache__/
+
+# So i don't accidentally push any files im working on
+*.mst
+*.wld
+*.new
