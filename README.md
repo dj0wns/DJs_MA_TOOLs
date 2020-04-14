@@ -10,13 +10,13 @@ wld\_extractor.py takes input of a wld files extracted using amPerl's MST extrac
 
 ### mst\_insert.py ###
 ```
-usage: mst_insert.py [-h] [-g | -x] input mst
+usage: mst_insert.py [-h] [-g | -x] mst files [files ...]
 
 Insert a file into the MST
 
 positional arguments:
-  input           File to insert into the mst
   mst             The MST
+  files           Files to insert into the mst
 
 optional arguments:
   -h, --help      show this help message and exit
