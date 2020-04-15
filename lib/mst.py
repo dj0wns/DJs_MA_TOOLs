@@ -2,7 +2,7 @@ from enum import Enum
 import datetime
 
 from loaders import get_loader
-from misc import BinaryIO, ProtocolException
+from .misc import BinaryIO, ProtocolException
 
 
 class GamePlatform(Enum):
@@ -39,6 +39,7 @@ class MST:
         if reader.little_endian:
             # no idea what this is, but seems to be 3 in PS2 builds, 2 in Xbox & GC
             platform_id = self.suffix_unknowns[14]
+            print(platform_id)
             if platform_id == 3:
                 self.platform = GamePlatform.playstation
             elif platform_id == 2:

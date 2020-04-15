@@ -45,17 +45,24 @@ class CSVLoader(Loader):
                     reader.seek(self.entry.location + str_loc)
                     str_val = reader.read_str(str_len)
                     reader.seek(tmp_pos)
-                    values.append('a:' + str_val)
+                    values.append(str_val)
                 elif val_type == 1:  # number(float)
                     float_val, _ = reader.read_fmt('fI')
-                    values.append(float_val)
+                    if float_val >= 1 or float_val == 0:
+                      values.append(int(float_val))
+                    else:
+                      values.append(float("{0:.1f}".format(float_val)))
                 elif val_type == 2:  # utf16 string
                     str_loc, str_len = reader.read_fmt('II')
                     tmp_pos = reader.pos
                     reader.seek(self.entry.location + str_loc)
-                    str_val = reader.handle.read(str_len * 2).decode('utf-16-le')
+                    if reader.little_endian:
+                      str_val = reader.handle.read(str_len * 2).decode('utf-16le')
+                    else:
+                      str_val = reader.handle.read(str_len * 2).decode('utf-16be')
+
                     reader.seek(tmp_pos)
-                    values.append('u:' + str_val)
+                    values.append(str_val)
                 else:
                     raise Exception('malformed CSV')
 
@@ -64,7 +71,19 @@ class CSVLoader(Loader):
         self.data = out_dict
 
     def save(self, handle):
-        handle.write(json.dumps(self.data).encode())
+        for key in self.data.keys():
+          handle.write(key.encode('ascii', 'ignore'))
+          handle.write(",".encode())
+          for item in self.data[key]:
+            if isinstance(item, str):
+              handle.write(item.encode('ascii', "ignore"))
+              handle.write(",".encode())
+            else:
+              handle.write(str(item).encode('ascii', 'ignore'))
+              handle.write(",".encode())
+          handle.write("\n".encode())
+
+
 
     def reimport(self, handle):
         self.data = json.loads(handle.read().decode())
