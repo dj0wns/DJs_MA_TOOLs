@@ -44,3 +44,19 @@ optional arguments:
   -p, --print     Print the structures to stdout
 
 ```
+
+### csv\_rebuilder.py ###
+```
+usage: csv_rebuilder.py [-h] [-g | -x] input output
+
+Rebuild a CSV file
+
+positional arguments:
+  input           Input CSV file
+  output          Output file
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -g, --gamecube  Use gamecube endian - small endian
+  -x, --xbox      Use xbox endian - big endian [Default]
+```
