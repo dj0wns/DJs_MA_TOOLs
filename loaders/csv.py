@@ -48,10 +48,7 @@ class CSVLoader(Loader):
                     values.append(str_val)
                 elif val_type == 1:  # number(float)
                     float_val, _ = reader.read_fmt('fI')
-                    if float_val >= 1 or float_val == 0:
-                      values.append(int(float_val))
-                    else:
-                      values.append(float("{0:.1f}".format(float_val)))
+                    values.append(float("{0:.5f}".format(float_val)))
                 elif val_type == 2:  # utf16 string
                     str_loc, str_len = reader.read_fmt('II')
                     tmp_pos = reader.pos
