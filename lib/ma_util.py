@@ -13,6 +13,16 @@ def roundup(x):
 def roundup_4(x):
   return int(math.ceil(x / 4.0)) * 4
 
+def roundup_2(x):
+  return int(math.ceil(x / 2.0)) * 2
+
+def isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
+
 def pretty_json(string):
   dump = json.dumps(json.loads(string), indent=4, sort_keys=False)
   #print(str(dump))
