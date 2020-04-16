@@ -266,10 +266,10 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
 
 def print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list):
   header.print_header()
-  meshHeader.print_header()
+  #meshHeader.print_header()
   initHeader.print_header()
-  for item in mesh_list:
-    item.print_header()
+  #for item in mesh_list:
+  #  item.print_header()
   #for item in init_shape_game_data_list:
   #  item[0].print_init()
   #  item[1].pretty_print()
@@ -296,10 +296,10 @@ if __name__ == '__main__':
     int_endian = '>i'
     short_endian = '>h' 
     #lazy but also set these in all sub classes
-    mesh_classes.endian='big'
-    mesh_classes.float_endian = '>f'
-    mesh_classes.int_endian = '>i'
-    mesh_classes.short_endian = '>h' 
+    #mesh_classes.endian='big'
+    #mesh_classes.float_endian = '>f'
+    #mesh_classes.int_endian = '>i'
+    #mesh_classes.short_endian = '>h' 
     init_classes.endian='big'
     init_classes.float_endian = '>f'
     init_classes.int_endian = '>i'
@@ -332,6 +332,9 @@ if __name__ == '__main__':
     
 
   #print
+  #TODO fix theses
+  meshHeader=""
+  mesh_list=[]
   if args.print:
     print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list)
     
