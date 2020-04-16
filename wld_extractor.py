@@ -8,7 +8,7 @@ import jsonpickle
 import argparse
 
 #set of ma specific classes
-from lib import ma_util, init_classes
+from lib import ma_util, init_classes#, mesh_classes
 
 #Notes - generates an outfile twice so it can easily fix offsets without having to keep track of where things are
 
@@ -23,6 +23,24 @@ py_path=os.path.dirname(fpath)
 def parse_wld_file(writer):
 
   header = init_classes.Header(writer)
+
+  #meshHeader = mesh_classes.MeshHeader(writer, header.data['offset_to_mesh_inits'])
+  meshHeader = None
+  
+  #mesh_size_list = []
+  #writer.seek(header.data['offset_to_mesh_sizes'])
+  #for item in range(header.data['mesh_count']):
+  #  mesh_size_list.append(int.from_bytes(writer.read(4), byteorder=endian, signed=False))
+  #
+  #print (sum( mesh_size_list))
+
+  mesh_list = []
+  #offset = meshHeader.data['offset_to_mesh_table']
+  #for i in range(header.data['mesh_count']):
+  #  writer.seek(offset)
+  #  mesh_list.append(mesh_classes.MeshObject(writer, mesh_size_list[i]))
+  #  #add current mesh's size to offset
+  #  offset = ma_util.roundup(offset + mesh_size_list[i])
   
   initHeader = init_classes.InitHeader(writer,header.data['offset_of_inits'])
 
@@ -42,7 +60,7 @@ def parse_wld_file(writer):
       gamedata = init_classes.GameDataHeader(writer,offset)
     init_shape_game_data_list.append([item, shape, gamedata])
   
-  return header, initHeader, init_shape_game_data_list
+  return header, meshHeader, mesh_list, initHeader, init_shape_game_data_list
 
 def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, start_of_inits, lightmap_name_locations_dict):
   #rebuild the init section by copying everything else then adding new inits
@@ -200,8 +218,36 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
   init_header_file.close()
 
   i = 0
+  used_name_list=[]
   for item in init_shape_game_data_list:
-    name = "shape" + str(i).zfill(4)
+    if item[2] is not None:
+      itemname = ""
+      itemtype = ""
+      for table in item[2].tables:
+        if table.data['keystring'] == b"name":
+          itemname = table.fields[0].data_string()
+        elif table.data['keystring'] == b"type":
+          itemtype = table.fields[0].data_string()
+      basename = ""
+      if itemtype:
+        basename+=itemtype
+      else:
+        basename+="shape"
+      basename += '-'
+      if itemname:
+        basename+=itemname
+      else:
+        basename+="unnamed"
+      basename += '-'
+
+      basename = ''.join(x.capitalize() or '_' for x in basename.split('_'))
+      j=0
+      while basename+str(j).zfill(4) in used_name_list:
+        j+=1
+      name = basename+str(j).zfill(4)
+      used_name_list.append(name)
+    else:
+      name = "shape" + str(i).zfill(4)
     init_object_file = open(os.path.join(out_path, name + "_init_object.json"), "w")
     init_object_file.write(ma_util.pretty_pickle_json(item[0]))
     init_object_file.close()
@@ -216,16 +262,19 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
       gamedata_file.write(item[2].to_json())
       gamedata_file.close()
 
-    i += 1
+    i+=1
 
-def print_classes(header, initHeader, init_shape_game_data_list):
+def print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list):
   header.print_header()
+  meshHeader.print_header()
   initHeader.print_header()
-  for item in init_shape_game_data_list:
-    item[0].print_init()
-    item[1].pretty_print()
-    if item[2] is not None:
-      item[2].pretty_print()
+  for item in mesh_list:
+    item.print_header()
+  #for item in init_shape_game_data_list:
+  #  item[0].print_init()
+  #  item[1].pretty_print()
+  #  if item[2] is not None:
+  #    item[2].pretty_print()
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
@@ -247,6 +296,10 @@ if __name__ == '__main__':
     int_endian = '>i'
     short_endian = '>h' 
     #lazy but also set these in all sub classes
+    mesh_classes.endian='big'
+    mesh_classes.float_endian = '>f'
+    mesh_classes.int_endian = '>i'
+    mesh_classes.short_endian = '>h' 
     init_classes.endian='big'
     init_classes.float_endian = '>f'
     init_classes.int_endian = '>i'
@@ -257,6 +310,10 @@ if __name__ == '__main__':
     int_endian = '<i'
     short_endian = '<h' 
     #lazy but also set these in all sub classes
+    #mesh_classes.endian='little'
+    #mesh_classes.float_endian = '<f'
+    #mesh_classes.int_endian = '<i'
+    #mesh_classes.short_endian = '<h' 
     init_classes.endian='little'
     init_classes.float_endian = '<f'
     init_classes.int_endian = '<i'
@@ -266,7 +323,7 @@ if __name__ == '__main__':
   if args.extract:
     path = args.input
     writer = open(path, "rb")
-    header, initHeader, init_shape_game_data_list = parse_wld_file(writer)
+    header, meshHeader, mesh_list, initHeader, init_shape_game_data_list = parse_wld_file(writer)
   elif args.rebuild:
     preinit, header, initHeader, init_shape_game_data_list = import_from_folder(args.input)
   else:
@@ -276,9 +333,9 @@ if __name__ == '__main__':
 
   #print
   if args.print:
-    print_classes(header, initHeader, init_shape_game_data_list)
+    print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list)
     
-  
+  #TODO remove this, just testing print
   if args.extract:
     extract_to_file(writer, args.output, header, initHeader, init_shape_game_data_list)
   elif args.rebuild:
