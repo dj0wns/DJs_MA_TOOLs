@@ -31,11 +31,11 @@ def iterateRow(line, row, current_keystring, current_fields):
         if not current_keystring:
           parseError("Leading comma without a valid keystring.", line, i)
         #else just let the rest of the elements be added as fields
-      if row[i][0] == '#':
+      elif row[i][0] == '#':
         #comment do nothing
         print("Skipping line: " + str(line) + " because it is commented out")
         return current_keystring, current_fields
-      if row[i] and row !="#":
+      elif row[i] and row !="#":
         #add new keystring
         if not current_keystring:
           current_keystring = row[i]
@@ -105,5 +105,6 @@ if __name__ == '__main__':
 
   #now convert header to bytes!
   #run twice to fix indices
+  csv_header.pretty_print()
   csv_header.to_bytes()
   csv_writer.write(csv_header.to_bytes())
