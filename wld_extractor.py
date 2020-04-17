@@ -224,9 +224,10 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
       itemname = ""
       itemtype = ""
       for table in item[2].tables:
-        if table.data['keystring'] == b"name":
+        keystring = table.data['keystring'].decode()
+        if keystring.lower() == "name":
           itemname = table.fields[0].data_string()
-        elif table.data['keystring'] == b"type":
+        elif keystring.lower() == "type":
           itemtype = table.fields[0].data_string()
       basename = ""
       if itemtype:
