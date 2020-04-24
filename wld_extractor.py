@@ -200,7 +200,6 @@ def import_from_folder(directory):
 
 #this takes all values and makes a folder and sticks them in it
 def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_list):
-      
   #rebuild the init section by copying everything else then adding new inits
   writer.seek(0)
   pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
