@@ -60,3 +60,24 @@ optional arguments:
   -g, --gamecube  Use gamecube endian - small endian
   -x, --xbox      Use xbox endian - big endian [Default]
 ```
+
+
+### sma\_extractor.py ###
+
+EXPERIMENTAL - currently only works on Linux and changing the count of instructions is likely to break. Good luck!
+
+```
+usage: sma_extractor.py [-h] [-e | -r] [-p] input output
+
+Extract or rebuild a sma file
+
+positional arguments:
+  input          input file or folder
+  output         output file or folder
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -e, --extract  Extract the contents of a sma file to a directory
+  -r, --rebuild  Rebuild a sma file from a folder full of extracted files
+  -p, --print    Print the structures to stdout
+```
