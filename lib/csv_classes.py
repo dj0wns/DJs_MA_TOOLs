@@ -37,8 +37,7 @@ class CSVHeader:
     print("--------------- Game Data CSV ---------------")
     for item in self.tables:
       row = str(item.data['keystring'])
-      row +=  " - " + str(item.data['keystring_length'])
-      row += ","
+      row +=  " - "
       for field in item.fields:
         row += str(field.data_string())
         row += ","

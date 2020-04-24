@@ -76,8 +76,6 @@ def insert(mst_data, insert_file_name, insert_reader):
   idx+=INT_BYTES
   idx=27 * 4 # start of toc
   delta = roundup(new_length) - roundup(original_length)
-  first = 99999999999
-  last = 0
   for i in range(file_count):
     name = mst_data[idx:idx+STR_BYTES]
     idx+=STR_BYTES
@@ -93,11 +91,6 @@ def insert(mst_data, insert_file_name, insert_reader):
     #if its a following file
     if location > original_location:
       mst_data_out[location_offset:location_offset+4] = struct.pack(pack_int,location+delta)
-    
-    if location < first:
-      first = location
-    if location + length > last:
-      last = location + length 
 
   return mst_data_out
 

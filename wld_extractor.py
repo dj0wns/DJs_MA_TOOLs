@@ -179,6 +179,7 @@ def import_from_folder(directory):
       if init_shape_game_data_dict[filename.split("_")[0]].shape.shape_type == "FWORLD_SHAPETYPE_MESH":
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_count = 0
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_offset = 0
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].flags = 0
         
     elif "_gamedata." in filename:
       gamedata = ma_util.Empty()
@@ -199,6 +200,7 @@ def import_from_folder(directory):
 
 #this takes all values and makes a folder and sticks them in it
 def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_list):
+      
   #rebuild the init section by copying everything else then adding new inits
   writer.seek(0)
   pre_init_data = bytearray(writer.read(header.data['offset_of_inits']))
