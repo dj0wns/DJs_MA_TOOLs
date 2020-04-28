@@ -1,0 +1,12 @@
+{
+  "file_name": "wemccity_02.png",
+  "level_name": "Secret Rendezvous",
+  "x_dimension": 4051,
+  "y_dimension": 9523,
+  "x_center": 2083,
+  "y_center": 5527,
+  "image_pixels_per_map_x": [0.050819, 5.304662],
+  "image_pixels_per_map_z": [5.21446, -0.0743234],
+  "map_per_pixel_x": [0.002686579502087283, 0.1917482973515378],
+  "map_per_pixel_y": [0.18848766240028658, -0.0018369774373246245]
+}
