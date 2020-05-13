@@ -330,12 +330,17 @@ if __name__ == '__main__':
   elif args.rebuild:
     preinit, header, initHeader, init_shape_game_data_list = import_from_folder(args.input)
   else:
-    print("Must specify extract or rebuild")
+    print("Must specify extract or rebuild or insert")
     sys.exit()
   
   if args.insert:
     #replace shapes
-    preinit,header,initHeader, init_shape_game_data_list = import_from_folder(args.output)
+    _,_,_, init_shape_game_data_list = import_from_folder(args.output)
+    #get preinit
+    writer.seek(0)
+    preinit = bytearray(writer.read(header.data['offset_of_inits']))
+    #update initheader
+    initHeader.data['item_count'] = len(init_shape_game_data_list)
     #output to the same file you read in from
     args.output = args.input
 
