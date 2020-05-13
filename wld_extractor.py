@@ -286,6 +286,7 @@ if __name__ == '__main__':
   operation = parser.add_mutually_exclusive_group()
   operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")
   operation.add_argument("-r", "--rebuild", help="Rebuild a wld file from a folder full of extracted files", action="store_true")
+  operation.add_argument("-i", "--insert", help="Inserts a folder full of shapes into the wld, overwriting the current shapes", action="store_true")
   parser.add_argument("-p", "--print", help="Print the structures to stdout", action="store_true")
   parser.add_argument("input", help="input file or folder")
   parser.add_argument("output", help="output file or folder")
@@ -322,7 +323,7 @@ if __name__ == '__main__':
     init_classes.short_endian = '<h' 
 
   #get input
-  if args.extract:
+  if args.extract or args.insert:
     path = args.input
     writer = open(path, "rb")
     header, meshHeader, mesh_list, initHeader, init_shape_game_data_list = parse_wld_file(writer)
@@ -331,19 +332,21 @@ if __name__ == '__main__':
   else:
     print("Must specify extract or rebuild")
     sys.exit()
-    
+  
+  if args.insert:
+    #replace shapes
+    preinit,header,initHeader, init_shape_game_data_list = import_from_folder(args.output)
+    #output to the same file you read in from
+    args.output = args.input
 
-  #print
-  #TODO fix theses
   meshHeader=""
   mesh_list=[]
   if args.print:
     print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list)
     
-  #TODO remove this, just testing print
   if args.extract:
     extract_to_file(writer, args.output, header, initHeader, init_shape_game_data_list)
-  elif args.rebuild:
+  elif args.rebuild or args.insert:
     lightmap_name_locations_dict = {}
     #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
     build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
