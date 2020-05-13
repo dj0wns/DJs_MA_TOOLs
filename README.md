@@ -1,12 +1,42 @@
 # DJ's Metal Arms Tools #
 
+## Getting Started ##
+1. Clone the repository with `git clone https://github.com/dj0wns/DJs\_MA\_TOOLs`
+2. Install Python3.7 or newer if you don't already have Python: [Python](https://www.python.org/downloads/)
+3. Run `pip install -r requirements.txt` to install all dependencies
+4. Start modding!
+
+## mst\_extract.py ##
+mst\_extract.py extracts all files in the MST to the provided folder. This is how you get files to modify with the other scripts.
+
 ## mst\_insert.py ##
-mst\_insert.py allows you to insert a file into any MST and replace a file with the exact same name. So for example if you make a modification to we01multi01.wld (the world file for Big E's House), you can use this tool to insert it into the MST so you can test it out in game!
+mst\_insert.py allows you to insert a file into any MST and replace a file with the exact same name. This is how you put your modded files back into the game!
 
 ## wld\_extractor.py ##
-wld\_extractor.py takes input of a wld files extracted using amPerl's MST extractor(https://github.com/amPerl/MATools) and splits it into (mostly) editable parts. You can then rebuild it and plug it right back into the MST!
+wld\_extractor.py takes input of a wld files extracted mst\_extract.py and splits it into (mostly) editable parts. You can then rebuild it and plug it right back into the MST!
+
+## csv\_extractor.py ##
+csv\_rebuilder.py takes input of a csv file extracted with mst\_extract.py and rebuilds it so it can be reinserted into the MST.
+
+## sma\_extractor.py ##
+sma\_extractor.py takes input of a sma file extracted with mst\_extract.py and outputs an assembly like representation. After editing, sma\_extractor.py can rebuild this script into a valid sma script that can be inserted into the MST.
 
 ## Usage ##
+
+### mst\_extract.py ###
+```
+usage: mst_extract.py [-h] [--ignore-existing] [-f FILE] mst path
+
+positional arguments:
+  mst                   path to the Metal Arms .MST file
+  path                  directory to put the extracted files in
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ignore-existing
+  -f FILE, --file FILE  extract only specific file
+```
+
 
 ### mst\_insert.py ###
 ```
