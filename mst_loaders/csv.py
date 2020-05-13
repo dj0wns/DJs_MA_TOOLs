@@ -1,6 +1,6 @@
 import json
 
-from loaders.base import Loader
+from mst_loaders.base import Loader
 
 """
 Dump everything in the format:

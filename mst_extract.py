@@ -1,8 +1,8 @@
 import argparse
 import os
 
-from lib.misc import BinaryIO
-from lib.mst import MST
+from mst_lib.misc import BinaryIO
+from mst_lib.mst import MST
 
 
 def extract(mst_path, out_path, ignore_existing, file_to_extract):

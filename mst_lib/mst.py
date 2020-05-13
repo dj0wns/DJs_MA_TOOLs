@@ -1,7 +1,7 @@
 from enum import Enum
 import datetime
 
-from loaders import get_loader
+from mst_loaders import get_loader
 from .misc import BinaryIO, ProtocolException
 
 
