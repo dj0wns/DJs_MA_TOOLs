@@ -154,6 +154,9 @@ class init_shape_game_data:
 def import_from_folder(directory): 
   init_shape_game_data_dict = {}
   init_shape_game_data_list = []
+  preinit = None
+  header = None
+  init_header = None
   for filename in os.listdir(directory):
     filepath = os.path.join(directory, filename)
     if filename == "preinit.dat":
@@ -194,8 +197,8 @@ def import_from_folder(directory):
   #sort the keys
   for key in sorted(init_shape_game_data_dict):
     init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata])
-
-  init_header.data['item_count'] = len(init_shape_game_data_list)
+  if init_header is not None:
+    init_header.data['item_count'] = len(init_shape_game_data_list)
   return preinit, header, init_header, init_shape_game_data_list
 
 #this takes all values and makes a folder and sticks them in it
