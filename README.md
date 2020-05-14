@@ -57,7 +57,7 @@ optional arguments:
 
 ### wld\_extractor.py ###
 ```
-usage: wld_extractor.py [-h] [-g | -x] [-e | -r] [-p] input output
+usage: wld_extractor.py [-h] [-g | -x] [-e | -r | -i] [-p] input output
 
 Extract or rebuild a wld file
 
@@ -71,8 +71,10 @@ optional arguments:
   -x, --xbox      Use xbox endian - big endian [Default]
   -e, --extract   Extract the contents of a wld file to a directory
   -r, --rebuild   Rebuild a wld file from a folder full of extracted files
+  -i, --insert    Inserts a folder full of shapes into the wld, overwriting
+                  the current shapes, put the .wld file as input and a folder
+                  containing shapes as output
   -p, --print     Print the structures to stdout
-
 ```
 
 ### csv\_rebuilder.py ###

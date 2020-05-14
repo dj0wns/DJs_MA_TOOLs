@@ -341,7 +341,7 @@ if __name__ == '__main__':
   operation = parser.add_mutually_exclusive_group()
   operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")
   operation.add_argument("-r", "--rebuild", help="Rebuild a wld file from a folder full of extracted files", action="store_true")
-  operation.add_argument("-i", "--insert", help="Inserts a folder full of shapes into the wld, overwriting the current shapes", action="store_true")
+  operation.add_argument("-i", "--insert", help="Inserts a folder full of shapes into the wld, overwriting the current shapes, put the .wld file as input and a folder containing shapes as output", action="store_true")
   parser.add_argument("-p", "--print", help="Print the structures to stdout", action="store_true")
   parser.add_argument("input", help="input file or folder")
   parser.add_argument("output", help="output file or folder")
