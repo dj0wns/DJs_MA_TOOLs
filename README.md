@@ -1,7 +1,7 @@
 # DJ's Metal Arms Tools #
 
 ## Getting Started ##
-1. Clone the repository with `git clone https://github.com/dj0wns/DJs\_MA\_TOOLs`
+1. Clone the repository with `git clone https://github.com/dj0wns/DJs_MA_TOOLs`
 2. Install Python3.7 or newer if you don't already have Python: [Python](https://www.python.org/downloads/)
 3. Run `pip install -r requirements.txt` to install all dependencies
 4. Start modding!
