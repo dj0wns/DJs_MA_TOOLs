@@ -40,18 +40,21 @@ optional arguments:
 
 ### mst\_insert.py ###
 ```
-usage: mst_insert.py [-h] [-g | -x] mst files [files ...]
+usage: mst_insert.py [-h] [-g | -x] [-s SUFFIX] mst files [files ...]
 
 Insert a file into the MST
 
 positional arguments:
-  mst             The MST
-  files           Files to insert into the mst
+  mst                   The MST
+  files                 Files to insert into the mst
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -g, --gamecube  Use gamecube endian - small endian
-  -x, --xbox      Use xbox endian - big endian [Default]
+  -h, --help            show this help message and exit
+  -g, --gamecube        Use gamecube endian - small endian
+  -x, --xbox            Use xbox endian - big endian [Default]
+  -s SUFFIX, --suffix SUFFIX
+                        The suffix for the new mst. Is '.new' by default. If
+                        this is blank it will overwrite the mst.
 ```
 
 

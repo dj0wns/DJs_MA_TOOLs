@@ -94,7 +94,7 @@ def insert(mst_data, insert_file, insert_file_name, insert_reader):
 
   return mst_data_out
 
-def execute(is_big_endian, mst, files):
+def execute(is_big_endian, mst, files, output_suffix):
   global endian
   global pack_int
   if is_big_endian:
@@ -104,7 +104,7 @@ def execute(is_big_endian, mst, files):
     endian='little'
     pack_int = '<i'
 
-  mst_out = mst + ".new"
+  mst_out = mst + output_suffix
   mst_reader = open(mst, "rb")
   mst_data = mst_reader.read()
   mst_reader.close()
@@ -134,9 +134,10 @@ if __name__ == '__main__':
   endian = parser.add_mutually_exclusive_group()
   endian.add_argument("-g", "--gamecube", help="Use gamecube endian - small endian", action="store_true")
   endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
+  parser.add_argument("-s", "--suffix",  help="The suffix for the new mst. Is '.new' by default. If this is blank it will overwrite the mst.", default=".new")
   parser.add_argument("mst", help="The MST")
   parser.add_argument("files", type=str, nargs='+', help="Files to insert into the mst")
   args = parser.parse_args()
-  execute(args.gamecube, args.mst, args.files)
+  execute(args.gamecube, args.mst, args.files, args.suffix)
 
 

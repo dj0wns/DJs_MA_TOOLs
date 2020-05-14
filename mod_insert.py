@@ -35,7 +35,7 @@ def execute(mst, modfile):
         wld_file = os.path.join(wld_tempdir, f_to_open)
         wld_extractor.execute(not little_endian, False, False, True, False, wld_file, dirpath)
         #now insert wld back into the mst
-        mst_insert.execute(not little_endian, mst, [wld_file])
+        mst_insert.execute(not little_endian, mst, [wld_file], "")
       except Exception as e:
         print(e)
       finally:
