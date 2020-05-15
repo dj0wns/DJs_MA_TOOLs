@@ -24,7 +24,7 @@ file_type_list =[
   ".sma",
   ".wvb"]
 
-def execute(mst, modfile):
+def execute(mst, modfile, newMST):
   try:
     # get temporary folder to extract zip to
     dirpath = tempfile.mkdtemp()
@@ -90,7 +90,10 @@ def execute(mst, modfile):
         break
 
       #now insert wld back into the mst
-      mst_insert.execute(not little_endian, mst, files_to_insert, "")
+      if newMST:
+        mst_insert.execute(not little_endian, mst, files_to_insert, ".new")
+      else:
+        mst_insert.execute(not little_endian, mst, files_to_insert, "")
     except Exception as e:
       print(e)
     finally:
@@ -106,9 +109,10 @@ def execute(mst, modfile):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
+  parser.add_argument("-n", "--newMST", help="Output a new mst, by default it overwrites the original mst", action='store_true')
   parser.add_argument("mst", help="A game MST you want to modify")
   parser.add_argument("modfile", help="a zipfile containing the mod you want to edit")
   args = parser.parse_args()
 
-  execute(args.mst, args.modfile)
+  execute(args.mst, args.modfile, args.newMST)
 
