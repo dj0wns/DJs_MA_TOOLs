@@ -5,7 +5,7 @@ import os
 import argparse
 from distutils.util import strtobool
 
-import mst_extract, mst_insert, wld_extractor
+import mst_extract, mst_insert, wld_extractor, csv_rebuilder
 
 file_type_list =[
   ".ape",
@@ -74,6 +74,9 @@ def execute(mst, modfile, newMST):
         name, extension = os.path.splitext(f)
         if extension in file_type_list:
           files_to_insert.append(os.path.join(dirpath,f))
+        if extension == ".csv":
+          #then need to run it through the csv compiler in place
+          csv_rebuilder.execute(not little_endian, False, os.path.join(dirpath,f), os.path.join(dirpath,f))
       #let the user know what is being inserted
       print("This mod will replace the following files: ")
       for f in files_to_insert:
