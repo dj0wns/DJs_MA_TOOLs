@@ -58,8 +58,8 @@ def iterateRow(line, row, current_keystring, current_fields, csv_header):
         current_fields.append(row[i])
   return current_keystring, current_fields
 
-def execute(is_little_endian, print, input_csv, output_csv):
-  if args.gamecube:
+def execute(is_big_endian, print, input_csv, output_csv):
+  if is_big_endian:
     #lazy but also set these in all sub classes
     csv_classes.endian='big'
     csv_classes.float_endian = '>f'
