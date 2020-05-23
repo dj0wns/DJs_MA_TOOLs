@@ -1,6 +1,6 @@
 import argparse
 import os
-from maze_lib import graph_to_shapes, output_shapes
+from maze_lib import graph_to_shapes, generate_maze_graph, output_shapes
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
