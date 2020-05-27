@@ -127,8 +127,7 @@ if __name__ == "__main__":
   
   def map_update(var, idx, mode):
     loaded_map = maps[top_menu.get_selected_map()]
-    image_canvas.map_info = loaded_map
-    image_canvas.redraw()
+    image_canvas.set_new_map(loaded_map, photo_dir)
 
   def open_wld():
     global init_shape_gamedata

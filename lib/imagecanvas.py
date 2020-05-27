@@ -56,6 +56,11 @@ class ImageCanvas:
     map_z = self.map_info.data["map_per_pixel_x"][1] * image_x + self.map_info.data["map_per_pixel_y"][1] * image_y
     return map_x, map_z
 
+  def set_new_map(self, map_info, photo_dir):
+    self.map_info = map_info
+    self.orig_img = PIL.Image.open(os.path.join(photo_dir, map_info.data["file_name"]))
+    self.img = PIL.ImageTk.PhotoImage(self.orig_img)
+    self.redraw()
 
   def get_objects_at_pixel(self,x,y):
     canvas_x = self.canvas.canvasx(x)
