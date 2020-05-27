@@ -111,8 +111,8 @@ if __name__ == "__main__":
       init.data["Right_Z"] = -init.data["Front_X"]
       init.data["Right_Y"] = 0
       init.data["Up_X"] = 0
-      init.data["Up_Z"] = 1
-      init.data["Up_Y"] = 0
+      init.data["Up_Y"] = 1
+      init.data["Up_Z"] = 0
 
       image_canvas.redraw()
       #reset state
