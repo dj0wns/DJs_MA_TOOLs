@@ -1,6 +1,6 @@
 import argparse
 import os
-from maze_lib import graph_to_shapes, generate_maze_graph, output_shapes
+from maze_lib import graph_to_shapes, maze_graph, output_shapes
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
@@ -15,8 +15,10 @@ def execute(length, width, center_x, center_z, tesselation, mesh_name, mesh_widt
     mesh_width = 1.
   if path_thickness is None:
     path_thickness = 1.
+  if routing is None:
+    routing = "perfect"
   if tesselation.lower() in ("orthogonal"):
-    None
+    maze_dict = maze_graph.generate_maze_graph(float(length), float(width), path_thickness, mesh_width, tesselation, routing)
     # TODO by W
     #   call generate_maze()
     #     params:  length, width, path_thickness, mesh_width, tesselation,

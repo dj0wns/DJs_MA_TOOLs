@@ -1,4 +1,4 @@
-import maze_lib.tesselations
+from maze_lib import tesselations
 import random
 
 class Maze():
@@ -6,30 +6,30 @@ class Maze():
     #     params:  length, width, path_thickness, mesh_width, tesselation,
     #              routing
   def __init__(self, length, width, path_thickness, mesh_width, tesselation_name, routing):
-    # TODO: calculate x_units and z_units
-    self.tesselation = set_tesselation(tesselation_name)
-    self.routing = routing
-    self.outer_edges = None
-    self.inner_edges = None
-    self.border_walls = None
-    self.maze_walls = None
+    self._init_tesselation(tesselation_name.title(), length, width, path_thickness, mesh_width)
+    self.routing = routing.lower()
+    self.maze_walls = self._init_maze_walls(self.routing)
 
-  def set_tesselation(self, tesselation, *args):
+  def _init_tesselation(self, tesselation_name, length, width, path_thickness, mesh_width):
     try:
-      self.tesselation = getattr(tesselations, tesselation)(*args)
+      TesselationClass = getattr(tesselations, tesselation_name)
     except AttributeError:
-      error_msg = '{} is not a valid tesselation.'.format(tesselation)
+      error_msg = '{} is not a valid tesselation.'.format(tesselation_name)
       raise ValueError(error_msg)
-    self.inner_edges = list(self.tesselation.inner_edges.values())
-    self.outer_edges = list(self.tesselation.outer_edges)
+    self.tesselation = TesselationClass(length, width, path_thickness, mesh_width)
+    self.border_walls = self.tesselation.outer_edges
 
-  def randomize_maze_walls(self):
-    if self.tesselation is None:
-      error_msg = 'tesselation has not been set. Call set_tesselation() to set tesselation.'
-      raise AttributeError(error_msg)
+  def _init_maze_walls(self, routing):
+    if routing == "perfect":
+      return self._init_perfect_maze_walls()
+    else:
+      error_msg = '{} is not a valid routing.'.format(routing)
+      raise ValueError(error_msg)
+
+  def _init_perfect_maze_walls(self):
 
     def _is_maze_wall(edge):
-      node1, node2 = edge.path_nodes
+      node1, node2 = edge.nodes
       node1_parent = node1.find_parent()
       node2_parent = node2.find_parent()
       if node1_parent == node2_parent:
@@ -45,12 +45,7 @@ class Maze():
           node2_parent.rank += 1
         return False
 
-    # reset maze
-    for node in self.tesselation.path_nodes.values():
-      node.parent = node
-    random.shuffle(self.inner_edges)
     self.maze_walls = set()
-
-    for edge in self.inner_edges:
+    for edge in random.sample(list(self.tesselation.inner_edges.values()), len(self.tesselation.inner_edges)):
       if _is_maze_wall(edge):
         self.maze_walls.add(edge)
