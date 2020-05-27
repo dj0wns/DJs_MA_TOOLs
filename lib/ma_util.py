@@ -14,12 +14,15 @@ class init_shape_game_data:
     self.init = None
     self.gamedata = None
     self.shape = None
+    self.name = None
   def set_init(self, init):
     self.init = init
   def set_gamedata(self, gamedata):
     self.gamedata = gamedata
   def set_shape(self, shape):
     self.shape = shape
+  def set_name(self, name):
+    self.name = name
 
 def wld_folder_to_init_shape_gamedata(directory) :
   init_shape_game_data_dict = {}
@@ -39,6 +42,7 @@ def wld_folder_to_init_shape_gamedata(directory) :
       if filename.split("_")[0] not in init_shape_game_data_dict:
         init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
       init_shape_game_data_dict[filename.split("_")[0]].set_init(jsonpickle.decode(init_object_packed))
+      init_shape_game_data_dict[filename.split("_")[0]].set_name(filename.split("_")[0])
 
     elif "_shape." in filename:
       shape_packed = open(filepath, "rb").read()
@@ -63,7 +67,7 @@ def wld_folder_to_init_shape_gamedata(directory) :
   #set dict to list form - should have used a dict earlier but dont want to rewrite it
   #sort the keys
   for key in sorted(init_shape_game_data_dict):
-    init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata])
+    init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata, init_shape_game_data_dict[key].name])
 
   init_header.data['item_count'] = len(init_shape_game_data_list)
   return preinit, header, init_header, init_shape_game_data_list

@@ -16,18 +16,18 @@ class ImageCanvas:
     self.grid_id = None
     self.obj_id = None
     self.map_info = map_info
-    frame = tkinter.Frame(root, bd=2, relief=tkinter.SUNKEN)
-    frame.grid(row=gridx, column=gridy, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
-    frame.grid_rowconfigure(0, weight=1)
-    frame.grid_columnconfigure(0, weight=1)
+    self.frame = tkinter.Frame(root, bd=2, relief=tkinter.SUNKEN)
+    self.frame.grid(row=gridx, column=gridy, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
+    self.frame.grid_rowconfigure(0, weight=2)
+    self.frame.grid_columnconfigure(0, weight=2)
     
-    xscrollbar = tkinter.Scrollbar(frame, orient=tkinter.HORIZONTAL)
-    yscrollbar = tkinter.Scrollbar(frame, orient=tkinter.VERTICAL)
+    xscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.HORIZONTAL)
+    yscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.VERTICAL)
 
     xscrollbar.grid(row=1, column=0, sticky=tkinter.E+tkinter.W)
     yscrollbar.grid(row=0, column=1, sticky=tkinter.N+tkinter.S)
     
-    self.canvas = tkinter.Canvas(frame, bd=5, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, \
+    self.canvas = tkinter.Canvas(self.frame, bd=2, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, \
                                  xscrollincrement = 10, yscrollincrement = 10)
     self.canvas.grid(row=0, column=0, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
    
@@ -38,12 +38,24 @@ class ImageCanvas:
     self.redraw()
     xscrollbar.config(command=self.canvas.xview)
     yscrollbar.config(command=self.canvas.yview)
-    
-    #frame.pack(fill="both", expand=True)
 
     self.canvas.bind("<Button 1>", left_click_callback)
     self.canvas.bind("<Button 3>", self.grab)
     self.canvas.bind("<B3-Motion>", self.drag)
+
+  def pixel_to_wld_coords(self, x, y):
+    canvas_x = self.canvas.canvasx(x)
+    canvas_y = self.canvas.canvasy(y)
+
+    image_x = canvas_x/self.scale + self.map_info.data['x_dimension']/2
+    image_y = canvas_y/self.scale + self.map_info.data['y_dimension']/2
+
+    image_x -= self.map_info.data['x_center']
+    image_y -= self.map_info.data['y_center']
+    map_x = self.map_info.data["map_per_pixel_x"][0] * image_x + self.map_info.data["map_per_pixel_y"][0] * image_y
+    map_z = self.map_info.data["map_per_pixel_x"][1] * image_x + self.map_info.data["map_per_pixel_y"][1] * image_y
+    return map_x, map_z
+
 
   def get_objects_at_pixel(self,x,y):
     canvas_x = self.canvas.canvasx(x)
@@ -59,9 +71,6 @@ class ImageCanvas:
       d_pixel_y = map_x * self.map_info.data["image_pixels_per_map_x"][1] + map_z * self.map_info.data["image_pixels_per_map_z"][1]  
       pixel_x = d_pixel_x + self.map_info.data['x_center']
       pixel_y = d_pixel_y + self.map_info.data['y_center']
-      #set scale
-      pixel_x = pixel_x
-      pixel_y = pixel_y
       
       border = self.rect_size / self.scale
 
