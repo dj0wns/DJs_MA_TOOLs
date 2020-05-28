@@ -1,0 +1,12 @@
+{
+  "file_name": "we03multi03.png",
+  "level_name": "Tanks A Lot",
+  "x_dimension": 1904,
+  "y_dimension": 5338,
+  "x_center": 974.9376,
+  "y_center": 2120.9552,
+  "image_pixels_per_map_x": [-3.5093555319830156, 0.05015436459362793],
+  "image_pixels_per_map_z": [-0.007153671707257669, 3.414489780367761],
+  "map_per_pixel_x": [-0.28496113717773985, 0.0041857043623916845],
+  "map_per_pixel_y": [-0.0005970199226886658, 0.2928782944101133]
+}
