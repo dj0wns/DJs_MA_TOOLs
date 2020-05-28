@@ -137,6 +137,7 @@ if __name__ == "__main__":
       # ma_util.wld_folder_to_init_shape_gamedata returns 4 objects, only care about the last one
       init_shape_gamedata = ma_util.wld_folder_to_init_shape_gamedata(dir_name)[-1]
       tk.title(window_title + " - " + os.path.basename(dir_name))
+      draw_objects()
   
   def save_wld():
     if dir_name is None:
@@ -175,6 +176,6 @@ if __name__ == "__main__":
   tk.title(window_title + " - " + no_file_message)
   image_canvas = imagecanvas.ImageCanvas(tk, loaded_map, photo_dir, 0,0, left_click_callback)
   top_menu = top_menu.Top_Menu(tk, 1, 0, open_wld, map_update, maps, save_wld)
-  button_menu = menu.Menu(tk, 2, 0, zoom_in, zoom_out, add_object, add_grid, draw_objects, dropdown_update)
+  button_menu = menu.Menu(tk, 2, 0, zoom_in, zoom_out, add_object, add_grid, dropdown_update)
   tk.mainloop()
 
