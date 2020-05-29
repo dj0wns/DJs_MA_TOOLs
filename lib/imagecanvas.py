@@ -118,6 +118,34 @@ class ImageCanvas:
     self._x = event.x
     self._y = event.y
 
+  def draw_axis_line(self, center_x, center_y, slope, x_dim, y_dim, line_width):
+    b = center_y - center_x * slope
+    if abs(slope) > 1:
+      #look for collision with horizontal border
+      x_0 = (0 - b) / slope
+      x_1 = (y_dim - b) / slope
+      line = ((x_0,0), (x_1, y_dim))
+    else:
+      #look for collision with vertical border
+      y_0 = slope*0 + b
+      y_1 = slope*x_dim + b
+      line = ((0,y_0), (x_dim, y_1))
+    self.draw.line(line, fill=(255,128,255,255), width=line_width)
+
+  def draw_line(self, x, y, slope, x_dim, y_dim, line_width):
+    b = y - x * slope
+    if abs(slope) > 1:
+      #look for collision with horizontal border
+      x_0 = (0 - b) / slope
+      x_1 = (y_dim - b) / slope
+      line = ((x_0,0), (x_1, y_dim))
+    else:
+      #look for collision with vertical border
+      y_0 = slope*0 + b
+      y_1 = slope*x_dim + b
+      line = ((0,y_0), (x_dim, y_1))
+    self.draw.line(line, fill=(255,255,255,255), width=line_width)
+
   def add_grid(self, line_spacing):
     self.grid_size = line_spacing
     self.grid_id = True
@@ -126,7 +154,7 @@ class ImageCanvas:
     y_dim = int(self.map_info.data['y_dimension'] * self.scale)
     pixels_per_x = self.map_info.data["image_pixels_per_map_x"]
     pixels_per_z = self.map_info.data["image_pixels_per_map_z"]
-    
+
     self.grid_orig = PIL.Image.new('RGBA', (x_dim, y_dim), (255, 0, 0, 0))
     self.draw = PIL.ImageDraw.Draw(self.grid_orig)
     
@@ -135,15 +163,9 @@ class ImageCanvas:
     #draw origin line
     center_x = self.map_info.data['x_center'] * self.scale
     center_y = self.map_info.data['y_center'] * self.scale
-    #find the x axis
-    #y = mx + b you know the drill
     m = (pixels_per_x[1]/pixels_per_x[0])
-    b = center_y - center_x * m
-    #now find the 2 edge intersects (y = 0, y = max) and then make it relative to center
-    x_0 = (0 - b) / m
-    x_1 = (y_dim - b) / m
-    x_axis = ((x_0,0), (x_1, y_dim))
-    self.draw.line(x_axis, fill=(255,128,255,255), width=line_width)
+    self.draw_axis_line(center_x, center_y, m, x_dim, y_dim, line_width)
+
 
     #add more positive x_axis lines
     new_x = center_x
@@ -152,11 +174,7 @@ class ImageCanvas:
         and new_x > 0 and new_y > 0:
       new_x = new_x + line_spacing * pixels_per_z[0]
       new_y = new_y + line_spacing * pixels_per_z[1]
-      b = new_y - new_x * m
-      x_0 = (0 - b) / m
-      x_1 = (y_dim - b) / m
-      line = ((x_0,0), (x_1, y_dim))
-      self.draw.line(line, fill=(255,255,255,255), width=line_width)
+      self.draw_line(new_x, new_y, m, x_dim, y_dim, line_width)
     
     #add more negative x_axis lines
     new_x = center_x
@@ -165,22 +183,11 @@ class ImageCanvas:
         and new_x > 0 and new_y > 0:
       new_x = new_x - line_spacing * pixels_per_z[0]
       new_y = new_y - line_spacing * pixels_per_z[1]
-      b = new_y - new_x * m
-      x_0 = (0 - b) / m
-      x_1 = (y_dim - b) / m
-      line = ((x_0,0), (x_1, y_dim))
-      self.draw.line(line, fill=(255,255,255,255), width=line_width)
-
+      self.draw_line(new_x, new_y, m, x_dim, y_dim, line_width)
     
     #find the z axis
     m = (pixels_per_z[1]/pixels_per_z[0])
-    b = center_y - center_x * m
-    #now fine the 2 edge intersects (y = 0, y = max)
-    y_0 = m*0 + b
-    y_1 = m*x_dim + b
-
-    y_axis = ((0,y_0), (x_dim, y_1))
-    self.draw.line(y_axis, fill=(255,128,255,255), width=line_width)
+    self.draw_axis_line(center_x, center_y, m, x_dim, y_dim, line_width)
     
     #add more positive z_axis lines
     new_x = center_x
@@ -189,11 +196,7 @@ class ImageCanvas:
         and new_x > 0 and new_y > 0:
       new_x = new_x + line_spacing * pixels_per_x[0]
       new_y = new_y + line_spacing * pixels_per_x[1]
-      b = new_y - new_x * m
-      y_0 = m*0 + b
-      y_1 = m*x_dim + b
-      line = ((0,y_0), (x_dim, y_1))
-      self.draw.line(line, fill=(255,255,255,255), width=line_width)
+      self.draw_line(new_x, new_y, m, x_dim, y_dim, line_width)
     
     #add more negative z_axis lines
     new_x = center_x
@@ -202,11 +205,7 @@ class ImageCanvas:
         and new_x > 0 and new_y > 0:
       new_x = new_x - line_spacing * pixels_per_x[0]
       new_y = new_y - line_spacing * pixels_per_x[1]
-      b = new_y - new_x * m
-      y_0 = m*0 + b
-      y_1 = m*x_dim + b
-      line = ((0,y_0), (x_dim, y_1))
-      self.draw.line(line, fill=(255,255,255,255), width=line_width)
+      self.draw_line(new_x, new_y, m, x_dim, y_dim, line_width)
     
     self.grid_img = PIL.ImageTk.PhotoImage(self.grid_orig)
     self.grid_id = self.canvas.create_image(0, 0, image=self.grid_img)
