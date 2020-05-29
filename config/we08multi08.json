@@ -1,0 +1,12 @@
+{
+  "file_name": "we08multi08.png",
+  "level_name": "The Trenches MP",
+  "x_dimension": 3840,
+  "y_dimension": 2160,
+  "x_center": 790,
+  "y_center": 1663,
+  "image_pixels_per_map_x": [-3.2336726255701924, 1.6445180953549978],
+  "image_pixels_per_map_z": [1.2729480931118693, 2.995768699241063],
+  "map_per_pixel_x": [-0.2542941637675591, 0.13959400602752187],
+  "map_per_pixel_y": [0.10805349256082336, 0.2744885065478315]
+}
