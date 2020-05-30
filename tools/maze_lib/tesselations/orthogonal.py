@@ -4,10 +4,10 @@ from maze_lib.tesselations.base import Tesselation, Node, OuterEdge, InnerEdge
 class Orthogonal(Tesselation):
 
   def _init_units(self, length, width, path_thickness, mesh_width):
-    super()._init_units(length, width, path_thickness, mesh_width)
+    super()._init_units(path_thickness, mesh_width)
     # TODO: account for too small of x_units and z_units
-    self.x_units = int(self.width // self.unit_width)
-    self.z_units = int(self.length // self.unit_width)
+    self.x_units = int(width // self.unit_width)
+    self.z_units = int(length // self.unit_width)
 
   def _add_node(self, node):
     self.nodes[node.graph_coordinates] = node
@@ -158,6 +158,8 @@ class Orthogonal(Tesselation):
       self.outer_edges.add(OuterEdge(w_wall_point, last_wall_point))
 
   def _calc_map_coordinates(self, coordinates):
-    x, z = coordinates
-    # TODO: translate coordinates to map coordinates
-    return (0.0, 0.0)
+    x_graph, z_graph = coordinates
+    x_map = self.unit_width * (x_graph - self.x_units/2.)
+    z_map = self.unit_width * (self.z_units/2. - z_graph)
+
+    return (x_map, z_map)

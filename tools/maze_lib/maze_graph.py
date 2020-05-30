@@ -9,7 +9,6 @@ from maze_lib.maze import Maze
 #  "path_nodes": {
 #    <PathNode.id>: {
 #      "node": <Node>,
-#      "map_coordinates": (0.0, 0.0),
 #      "is_leaf_node": True,
 #      "dist_from_start": 1,
 #      "dist_from_finish": 1,

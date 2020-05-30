@@ -43,9 +43,7 @@ class Tesselation(ABC):
     self._init_units(length, width, path_thickness, mesh_width)
     self._init_nodes_and_edges()
 
-  def _init_units(self, length, width, path_thickness, mesh_width):
-    self.length = length
-    self.width = width
+  def _init_units(self, path_thickness, mesh_width):
     self.unit_width = path_thickness + mesh_width
 
   def _create_wall_point(self, coordinates):
