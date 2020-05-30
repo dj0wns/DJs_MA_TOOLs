@@ -157,7 +157,14 @@ class Orthogonal(Tesselation):
     if w_wall_point:
       self.outer_edges.add(OuterEdge(w_wall_point, last_wall_point))
 
-  def _calc_map_coordinates(self, coordinates):
+  def _calc_node_map_coordinates(self, coordinates):
+    x_graph, z_graph = coordinates
+    x_map = self.unit_width * (x_graph - (self.x_units-1)/2.)
+    z_map = self.unit_width * ((self.z_units-1)/2. - z_graph)
+
+    return (x_map, z_map)
+
+  def _calc_wall_map_coordinates(self, coordinates):
     x_graph, z_graph = coordinates
     x_map = self.unit_width * (x_graph - self.x_units/2.)
     z_map = self.unit_width * (self.z_units/2. - z_graph)

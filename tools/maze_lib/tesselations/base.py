@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 
 class Node():
 
-  def __init__(self, id, graph_coordinates):
+  def __init__(self, id, graph_coordinates, map_coordinates):
     self.id = id
     self.graph_coordinates = graph_coordinates
+    self.map_coordinates = map_coordinates
     self.parent = self
     self.rank = 0
 
@@ -50,10 +51,11 @@ class Tesselation(ABC):
 
   def _create_node(self, graph_coordinates):
     self.node_id_sequence += 1
-    return Node(self.node_id_sequence, graph_coordinates)
+    map_coordinates = self._calc_node_map_coordinates(graph_coordinates)
+    return Node(self.node_id_sequence, graph_coordinates, map_coordinates)
 
   def _create_wall_point(self, graph_coordinates):
-    map_coordinates = self._calc_map_coordinates(graph_coordinates)
+    map_coordinates = self._calc_wall_map_coordinates(graph_coordinates)
     return WallPoint(map_coordinates)
 
   @abstractmethod
@@ -61,5 +63,9 @@ class Tesselation(ABC):
     pass
 
   @abstractmethod
-  def _calc_map_coordinates(self, coordinates):
+  def _calc_node_map_coordinates(self, graph_coordinates):
+    pass
+
+  @abstractmethod
+  def _calc_wall_map_coordinates(self, graph_coordinates):
     pass
