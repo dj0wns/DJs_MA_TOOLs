@@ -21,8 +21,8 @@ def generate_maze_graph(length, width, path_thickness, mesh_width, tesselation_n
 
   nodes = maze.tesselation.nodes.values()
 
-  start_node = random.choice(nodes)
-  finish_node = random.choice(nodes)
+  start_node = random.choice(list(nodes))
+  finish_node = random.choice(list(nodes))
 
   # TODO: run algorithm to calculate distance from start, distance from finish, and whether it's a leaf
   nodes_dict = {}
