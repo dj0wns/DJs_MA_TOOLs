@@ -1,4 +1,4 @@
-from maze_lib.tesselations.base import Tesselation, Node, OuterEdge, InnerEdge
+from maze_lib.tesselations.base import Tesselation, OuterEdge, InnerEdge
 
 
 class Orthogonal(Tesselation):
@@ -34,7 +34,7 @@ class Orthogonal(Tesselation):
     # first cell
     if self.x_units >= 1 and self.z_units >= 1:
       # first node
-      start_node = Node((0,0))
+      start_node = self._create_node((0,0))
       self._add_node(start_node)
       # first border corner
       start_nw_wall_point = self._create_wall_point((0,0))
@@ -53,7 +53,7 @@ class Orthogonal(Tesselation):
     prev_wall_point = start_sw_wall_point
     for z in range(1, self.z_units):
       # node
-      new_node = Node((0,z))
+      new_node = self._create_node((0,z))
       self._add_node(new_node)
       # left corner
       sw_wall_point = self._create_wall_point((0,z+1))
@@ -78,7 +78,7 @@ class Orthogonal(Tesselation):
     prev_wall_point = start_ne_wall_point
     for x in range(1, self.x_units):
       # node
-      new_node = Node((x,0))
+      new_node = self._create_node((x,0))
       self._add_node(new_node)
       # top corner
       sw_wall_point = self._create_wall_point((x,1)) if x>1 else prev_wall_col[0]
@@ -105,7 +105,7 @@ class Orthogonal(Tesselation):
       prev_wall_sw = start_wall_row[x-1]
       for z in range(1, self.z_units):
         # node
-        new_node = Node((x,z))
+        new_node = self._create_node((x,z))
         self._add_node(new_node)
         # wall corner
         nw_wall_point = prev_wall_sw
