@@ -12,9 +12,9 @@ def execute(length, width, center_x, center_z, tesselation, mesh_name, mesh_widt
   if mesh_name is None:
     mesh_name = "goshcrate02"
   if mesh_width is None:
-    mesh_width = 1.
+    mesh_width = 10.
   if path_thickness is None:
-    path_thickness = 1.
+    path_thickness = 10.
   if routing is None:
     routing = "perfect"
   if tesselation.lower() in ("orthogonal"):
@@ -57,4 +57,4 @@ if __name__ == '__main__':
   requiredNamed.add_argument("-w", "--width", help="Width of Maze in game units", required=True)
   parser.add_argument("output", type=str, help="Output folder")
   args = parser.parse_args()
-  execute(args.length, args.width, args.center_x, args.center_z, args.tesselation, args.routing, args.mesh_name, args.mesh_width, args.path_thickness, args.output)
+  execute(args.length, args.width, args.center_x, args.center_z, args.tesselation, args.mesh_name, args.mesh_width, args.path_thickness, args.routing, args.output)

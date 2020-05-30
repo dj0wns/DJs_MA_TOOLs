@@ -73,14 +73,35 @@ def default_init():
   init.data['Position_Y'] = 0
   init.data['Position_Z'] = 0
   init.data['shape_index'] = -1
-  init.data['pointer_to_game_data'] = -1
+  init.data['pointer_to_game_data'] = 0
   return init
 
 def default_mesh_shape():
   shape = Empty()
   shape.__class__ = init_classes.ShapeData
   shape.data = {}
+
   shape.shape_type = "FWORLD_SHAPETYPE_MESH"
+  shape.data['offset'] = -1
+
+  shape.data['mesh'] = Empty()
+  shape.data['mesh'].__class__ = init_classes.Mesh
+  shape.data['mesh'].mesh_offset = -1
+  shape.data['mesh'].mesh_name = "goshcrate02"
+  shape.data['mesh'].lightmap_names = []
+  shape.data['mesh'].lightmap_offsets = [0,0,0,0]
+  shape.data['mesh'].lightmap_motifs = [0,0,0,0]
+  shape.data['mesh'].flags = 0
+  shape.data['mesh'].cull_distance = 1.0000000150474662e+30
+  shape.data['mesh'].tint = Empty()
+  shape.data['mesh'].tint.__class__ = Vector
+  shape.data['mesh'].tint.dimensions = 3
+  shape.data['mesh'].tint.x = 1.0
+  shape.data['mesh'].tint.y = 1.0
+  shape.data['mesh'].tint.z = 1.0
+  shape.data['mesh'].color_stream_count = 0
+  shape.data['mesh'].color_stream_offset = 0
+
   return shape
 
 def default_point_shape():
