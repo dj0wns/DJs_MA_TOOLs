@@ -1,8 +1,10 @@
 from maze_lib.maze import Maze
 import random
 
+# TODO: give Nodes wall points
 
 #maze = {
+#  "wall_points": [<WallPoint>],
 #  "border_walls": set(<OuterEdge>),
 #  "maze_walls": set(<InnerEdge>),
 #  "start": <Node.id>,
@@ -32,6 +34,7 @@ def generate_maze_graph(length, width, path_thickness, mesh_width, tesselation_n
     }
 
   maze_dict = {
+    "wall_points": list(maze.tesselation.wall_points.values()),
     "border_walls": maze.border_walls,
     "maze_walls": maze.maze_walls,
     "start": start_node.id,
