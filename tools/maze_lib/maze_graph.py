@@ -17,7 +17,6 @@ from maze_lib.maze import Maze
 #}
 def generate_maze_graph(length, width, path_thickness, mesh_width, tesselation_name, routing):
   maze = Maze(length, width, path_thickness, mesh_width, tesselation_name, routing)
-  # TODO: calculate map coordinates
   # TODO: select start node
   # TODO: select finish node
   # TODO: assign IDs to path nodes

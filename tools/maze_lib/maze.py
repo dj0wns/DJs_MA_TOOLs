@@ -8,7 +8,7 @@ class Maze():
   def __init__(self, length, width, path_thickness, mesh_width, tesselation_name, routing):
     self._init_tesselation(tesselation_name.title(), length, width, path_thickness, mesh_width)
     self.routing = routing.lower()
-    self.maze_walls = self._init_maze_walls(self.routing)
+    self._init_maze_walls(self.routing)
 
   def _init_tesselation(self, tesselation_name, length, width, path_thickness, mesh_width):
     try:
