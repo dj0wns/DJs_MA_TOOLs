@@ -62,7 +62,7 @@ def create_shape_at_point(x_0, z_0, center_x, center_z):
     return init, shape, None
 
 
-def graph_to_shapes(maze_dict, mesh_name, center_x, center_z):
+def graph_to_shapes(maze_dict, wall_mesh, node_mesh, center_x, center_z):
   init_shape_game_data_list = []
   #make start shape
   #TODO add positions
@@ -91,7 +91,7 @@ def graph_to_shapes(maze_dict, mesh_name, center_x, center_z):
         create_shape_at_point(wall_point.map_coordinates[0],
                               wall_point.map_coordinates[1],
                               center_x, center_z)
-    shape.data['mesh'].mesh_name = mesh_name
+    shape.data['mesh'].mesh_name = node_mesh
     init_shape_game_data_list.append([init, shape, gamedata])
 
   for border_walls in maze_dict["border_walls"]:
@@ -101,7 +101,7 @@ def graph_to_shapes(maze_dict, mesh_name, center_x, center_z):
                                            border_walls.wall_points[1].map_coordinates[0],
                                            border_walls.wall_points[1].map_coordinates[1],
                                            center_x, center_z)
-    shape.data['mesh'].mesh_name = mesh_name
+    shape.data['mesh'].mesh_name = wall_mesh
     init_shape_game_data_list.append([init, shape, gamedata])
   
   for maze_walls in maze_dict["maze_walls"]:
@@ -111,7 +111,7 @@ def graph_to_shapes(maze_dict, mesh_name, center_x, center_z):
                                            maze_walls.wall_points[1].map_coordinates[0],
                                            maze_walls.wall_points[1].map_coordinates[1],
                                            center_x, center_z)
-    shape.data['mesh'].mesh_name = mesh_name
+    shape.data['mesh'].mesh_name = wall_mesh
     init_shape_game_data_list.append([init, shape, gamedata])
 
 
