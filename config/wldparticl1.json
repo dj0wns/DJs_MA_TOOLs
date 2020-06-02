@@ -1,0 +1,12 @@
+{
+  "file_name": "wldparticl1.png",
+  "level_name": "Test World Particle",
+  "x_dimension": 6904,
+  "y_dimension": 3712,
+  "x_center": 4449,
+  "y_center": 449,
+  "image_pixels_per_map_x": [2.178604651162791, 2.0781395348837215],
+  "image_pixels_per_map_z": [2.1232558139534885, -2.0923255813953485],
+  "map_per_pixel_x": [0.23323807133865224, 0.2316567084008221],
+  "map_per_pixel_y": [0.23668596102277373, -0.24285586887857002]
+}
