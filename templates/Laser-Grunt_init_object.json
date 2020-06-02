@@ -1,0 +1,22 @@
+{
+    "data": {
+        "Front_X": 0.0,
+        "Front_Y": 0.0,
+        "Front_Z": 1.0,
+        "Position_X": 0,
+        "Position_Y": 0,
+        "Position_Z": 0,
+        "Right_X": 1.0,
+        "Right_Y": 0.0,
+        "Right_Z": 0.0,
+        "Up_X": 0.0,
+        "Up_Y": 1.0,
+        "Up_Z": 0.0,
+        "offset": 1061200,
+        "pointer_to_game_data": 16252,
+        "shape_index": -1,
+        "shape_offset": 0,
+        "shape_type": "FWORLD_SHAPETYPE_POINT"
+    },
+    "py/object": "lib.init_classes.InitObject"
+}

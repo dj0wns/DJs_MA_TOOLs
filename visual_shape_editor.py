@@ -9,6 +9,7 @@ from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu
 fpath=os.path.dirname(os.path.realpath(__file__))
 photo_dir=os.path.join(fpath,"images")
 config_dir=os.path.join(fpath,"config")
+template_dir=os.path.join(fpath,"templates")
 
 scale = 1.0
 max_scale = 3.0

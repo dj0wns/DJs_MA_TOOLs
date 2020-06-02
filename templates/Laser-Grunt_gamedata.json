@@ -1,0 +1,56 @@
+{
+    "offset": 2437628,
+    "size": 664,
+    "number_of_tables": 13,
+    "pointer_to_tables": 16,
+    "flags": 0,
+    "name": [
+        "template"
+    ],
+    "type": [
+        "botgrunt"
+    ],
+    "ai_job": [
+        "wait"
+    ],
+    "NPCWeapon0": [
+        "laser"
+    ],
+    "NPCWeapon1": [
+        "grenade"
+    ],
+    "ai_intelligence": [
+        100.0
+    ],
+    "ai_courage": [
+        100.0
+    ],
+    "AI_Aggression": [
+        100.0
+    ],
+    "AI_ODDSOF_IGNORING_NEARBY_GRENADES": [
+        0.0
+    ],
+    "AI_PREFERSTOPANDSHOOT": [
+        "false"
+    ],
+    "AI_GRENADE_USE": [
+        "whenever"
+    ],
+    "AI_BONUS_EYE_SCAN_DIST_FOR_PLAYERS_ALERT": [
+        500.0
+    ],
+    "AI_ATTACK_NOTIFY_RADIUS": [
+        175.0
+    ],
+    "goodie1": [
+        "goodiebag=1",
+        "one"
+    ],
+    "goodie1__1": [
+        "washer",
+        5.0,
+        5.0,
+        1.0
+    ]
+}
