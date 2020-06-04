@@ -187,9 +187,16 @@ if __name__ == "__main__":
   tk.columnconfigure(0, weight=1)
   tk.rowconfigure(0, weight=1)
   tk.title(window_title + " - " + no_file_message)
-  image_canvas = imagecanvas.ImageCanvas(tk, loaded_map, photo_dir, 0,0, left_click_callback)
-  top_menu = top_menu.Top_Menu(tk, 1, 0, open_wld, map_update, maps, save_wld)
+  left_frame = tkinter.Frame(tk, bd=0, relief=tkinter.SUNKEN)
+  left_frame.grid(row=0, column=0, sticky=tkinter.N+tkinter.E+tkinter.W+tkinter.S)
+  left_frame.grid_rowconfigure(0, weight=1)
+  left_frame.grid_columnconfigure(0, weight=1)
+
+  image_canvas = imagecanvas.ImageCanvas(left_frame, loaded_map, photo_dir, 0,0, left_click_callback)
+  top_menu = top_menu.Top_Menu(left_frame, 1, 0, open_wld, map_update, maps, save_wld)
+  button_menu = menu.Menu(left_frame, 2, 0, zoom_in, zoom_out, add_object, add_grid)
+  
   right_edit_pane = edit_pane.Edit_Pane(tk,0,1, dropdown_update, save_shape)
-  button_menu = menu.Menu(tk, 2, 0, zoom_in, zoom_out, add_object, add_grid)
+  
   tk.mainloop()
 
