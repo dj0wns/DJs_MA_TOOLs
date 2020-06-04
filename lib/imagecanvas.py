@@ -18,8 +18,6 @@ class ImageCanvas:
     self.map_info = map_info
     self.frame = tkinter.Frame(root, bd=2, relief=tkinter.SUNKEN)
     self.frame.grid(row=gridx, column=gridy, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
-    self.frame.grid_rowconfigure(0, weight=2)
-    self.frame.grid_columnconfigure(0, weight=2)
     
     xscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.HORIZONTAL)
     yscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.VERTICAL)
@@ -30,6 +28,9 @@ class ImageCanvas:
     self.canvas = tkinter.Canvas(self.frame, bd=2, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, \
                                  xscrollincrement = 10, yscrollincrement = 10)
     self.canvas.grid(row=0, column=0, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
+    
+    self.frame.grid_rowconfigure(0, weight=1)
+    self.frame.grid_columnconfigure(0, weight=1)
    
     self.orig_img = PIL.Image.open(os.path.join(photo_dir, map_info.data["file_name"]))
 

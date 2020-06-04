@@ -10,9 +10,10 @@ class Edit_Pane:
     self.gamedata_dict = []
     self.field_frame = None
     self.frame = tkinter.Frame(root, bd=0, relief=tkinter.SUNKEN)
-    self.frame.grid(row=gridx, column=gridy, sticky=tkinter.N+tkinter.E+tkinter.W)
-    self.frame.grid_rowconfigure(0, weight=0)
-    self.frame.grid_columnconfigure(0, weight=1)
+    self.frame.grid(row=gridx, column=gridy, sticky='nsew')
+    self.frame.grid_rowconfigure(1, weight=1)
+    self.frame.grid_columnconfigure(0, weight=1, minsize=250)
+    self.frame.grid_columnconfigure(1, weight=0, minsize=12)
     
     self.object_list = ['No Selection']
     self.selected_object = tkinter.StringVar(self.frame)
@@ -21,11 +22,11 @@ class Edit_Pane:
     
     self.selected_object.trace('w', dropdown_update)
 
-    self.selected_object_menu.config(width=15)
-    self.selected_object_menu.grid(row=0, column=0)
+    self.selected_object_menu.config(width=20)
+    self.selected_object_menu.grid(row=0, column=0, sticky='n')
 
     save_shape_button = tkinter.Button(self.frame, text="Save Shape", command=save_shape)
-    save_shape_button.grid(row=3, column=0)
+    save_shape_button.grid(row=3, column=0, sticky='se')
 
   #updates local shape with the values in the text boxes
   def update_shape(self):
@@ -64,6 +65,7 @@ class Edit_Pane:
     if self.gamedata_list is not None:
       #Recreate gamedata from scratch
       new_gamedata = ma_util.default_gamedata()
+      print (self.gamedata_list)
       for row in self.gamedata_list:
         elem = 0
         key = ""
@@ -71,6 +73,9 @@ class Edit_Pane:
         types = []
         for value in row:
           if elem == 0:
+            if len(value.get()) <= 0:
+              key=""
+              break
             #key element
             key = value.get()
           elif value.get() != "":
@@ -81,6 +86,7 @@ class Edit_Pane:
             except:
               types.append("STRING")
           elem += 1
+
         if key != "":
           ma_util.add_table_to_gamedata(new_gamedata, key, fields, types)
       #now overwrite
@@ -100,29 +106,26 @@ class Edit_Pane:
   def update_fields(self, shape):
     #clear to prevent orphan fields
     self.clear_fields()
+
     #only canvas can have scroll bars so place frame in canvas
     canvas = tkinter.Canvas(self.frame)
-    canvas.grid(row=1, column=0, sticky=tkinter.N+tkinter.E+tkinter.W+tkinter.S)
-    canvas.grid_columnconfigure(0, weight=1)
-    canvas.grid_rowconfigure(0, weight=1)
+    canvas.grid(row=1, column=0, sticky='nsew')
     scrollbar = tkinter.Scrollbar(self.frame, orient="vertical", command=canvas.yview)
-    scrollbar.grid(row=1, column=1, sticky=tkinter.N+tkinter.S+tkinter.E)
-    scrollbar.grid_columnconfigure(0, weight=1)
-    scrollbar.grid_rowconfigure(0, weight=1)
+    scrollbar.grid(row=1, column=1, sticky='nse')
 
     self.field_frame = tkinter.Frame(canvas, bd=2, relief=tkinter.SUNKEN)
-    self.field_frame.grid(row=1, column=0, sticky=tkinter.N+tkinter.E+tkinter.W+tkinter.S)
-    self.field_frame.grid_rowconfigure(0, weight=1)
-    self.field_frame.grid_columnconfigure(0, weight=1)
+    self.field_frame.grid(row=1, column=0, sticky='ns')
     
     self.field_frame.bind(
       "<Configure>",
       lambda e: canvas.configure(
-        scrollregion=canvas.bbox("all")
+        scrollregion=canvas.bbox("all"),
+        width=245
       )
     )
-    canvas.create_window((0, 0), window=self.field_frame, anchor="nw")
+    canvas.create_window((0, 0), window=self.field_frame, anchor='nw')
     canvas.configure(yscrollcommand=scrollbar.set)
+
     
     self.shape = shape
     row=1
@@ -193,7 +196,7 @@ class Edit_Pane:
         #add new field buttons
         row+=1
         command = lambda i=table_index : self.add_data_field(i)
-        self.add_indented_button(self.field_frame, row, 1, "Add Field", command)
+        self.add_indented_button(self.field_frame, row, 2, "Add Field", command)
 
         self.gamedata_list.append(values)
         table_index += 1
@@ -214,51 +217,43 @@ class Edit_Pane:
     
 
   def add_indented_button(self, root, row, indent, title, command):
-    indent_size = 16
+    indent_size = 20
     total_indent = indent_size * indent
     frame = tkinter.Frame(root, bd=0, relief=tkinter.SUNKEN, padx=total_indent)
-    frame.grid(row=row, column=0, sticky=tkinter.N+tkinter.E+tkinter.W)
-    frame.grid_rowconfigure(0, weight=0)
-    frame.grid_columnconfigure(0, weight=0)
+    frame.grid(row=row, column=0, sticky='ew')
     
     button =  tkinter.Button(frame, text=title, command=command)
-    button.grid(row=0, column=0)
+    button.grid(row=0, column=0, sticky='ne')
     return button
       
   def add_indented_text_entry_field(self, root, row, indent, title, value):
     indent_size = 16
     total_indent = indent_size * indent
     frame = tkinter.Frame(root, bd=0, relief=tkinter.SUNKEN, padx=total_indent)
-    frame.grid(row=row, column=0, sticky=tkinter.N+tkinter.E+tkinter.W)
-    frame.grid_rowconfigure(0, weight=0)
-    frame.grid_columnconfigure(0, weight=0)
+    frame.grid(row=row, column=0, sticky='ew')
 
-    label = tkinter.Label(frame, text=title).grid(row=0, column=0)
+    label = tkinter.Label(frame, text=title).grid(row=0, column=0, sticky='nw')
     entry = tkinter.Entry(frame)
     entry.insert(tkinter.END, value)
-    entry.grid(row=0, column=1)
+    entry.grid(row=0, column=1, sticky='ne')
     return {title : entry}
 
   def add_text_entry_field(self, root, row, title, value):
     frame = tkinter.Frame(root, bd=0, relief=tkinter.SUNKEN)
-    frame.grid(row=row, column=0, sticky=tkinter.N+tkinter.E+tkinter.W)
-    frame.grid_rowconfigure(0, weight=0)
-    frame.grid_columnconfigure(0, weight=0)
+    frame.grid(row=row, column=0, sticky='ew')
 
-    label = tkinter.Label(frame, text=title).grid(row=0, column=0)
+    label = tkinter.Label(frame, text=title).grid(row=0, column=0, sticky='nw')
     entry = tkinter.Entry(frame)
     entry.insert(tkinter.END, value)
-    entry.grid(row=0, column=1)
+    entry.grid(row=0, column=1, sticky='ne')
     return {title : entry}
   
   def add_labeled_text(self, root, row, title, value):
     frame = tkinter.Frame(root, bd=0, relief=tkinter.SUNKEN)
-    frame.grid(row=row, column=0, sticky=tkinter.N+tkinter.E+tkinter.W)
-    frame.grid_rowconfigure(0, weight=0)
-    frame.grid_columnconfigure(0, weight=0)
+    frame.grid(row=row, column=0, sticky='new')
 
-    label = tkinter.Label(frame, text=title).grid(row=0, column=0)
-    value = tkinter.Label(frame, text=value).grid(row=0, column=1)
+    label = tkinter.Label(frame, text=title).grid(row=0, column=0, sticky='nw')
+    value = tkinter.Label(frame, text=value).grid(row=0, column=1, sticky='ne')
 
   def get_object_index(self, selection):
     if selection in self.object_list:
