@@ -78,7 +78,7 @@ class Edit_Pane:
               break
             #key element
             key = value.get()
-          elif value.get() != "":
+          elif len(value.get()):
             fields.append(value.get())
             try:
               f_value = float(value.get())
