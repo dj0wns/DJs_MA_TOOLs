@@ -124,7 +124,7 @@ def default_gamedata():
   gamedata.tables=[]
   return gamedata
 
-def add_table_to_gamedata(gamedata, table_name, values, var_type):
+def add_table_to_gamedata(gamedata, table_name, values, var_types):
   table = Empty()
   table.__class__ = init_classes.GameDataTable
   table.data = {}
@@ -138,7 +138,7 @@ def add_table_to_gamedata(gamedata, table_name, values, var_type):
   table.data['field_offset'] = -1
   table.data['keystring'] = table_name.encode('ascii')
   #now add fields
-  for value in values:
+  for value, var_type in zip(values, var_types):
     field = Empty()
     field.__class__ = init_classes.GameDataField
     field.data = {}

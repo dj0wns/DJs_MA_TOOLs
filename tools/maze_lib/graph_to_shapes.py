@@ -70,7 +70,7 @@ def graph_to_shapes(maze_dict, wall_mesh, node_mesh, center_x, center_z):
   init.data['shape_type'] = "FWORLD_SHAPETYPE_POINT"
   shape = ma_util.default_point_shape()
   gamedata = ma_util.default_gamedata()
-  ma_util.add_table_to_gamedata(gamedata, "name", ["start01"], "STRING")
+  ma_util.add_table_to_gamedata(gamedata, "name", ["start01"], ["STRING"])
   init_shape_game_data_list.append([init, shape, gamedata])
 
   #make end shape
@@ -79,9 +79,9 @@ def graph_to_shapes(maze_dict, wall_mesh, node_mesh, center_x, center_z):
   init.data['shape_type'] = "FWORLD_SHAPETYPE_POINT"
   shape = ma_util.default_point_shape()
   gamedata = ma_util.default_gamedata()
-  ma_util.add_table_to_gamedata(gamedata, "name", ["end01"], "STRING")
-  ma_util.add_table_to_gamedata(gamedata, "type", ["goodie"], "STRING")
-  ma_util.add_table_to_gamedata(gamedata, "goodietype", ["secret chip"], "STRING")
+  ma_util.add_table_to_gamedata(gamedata, "name", ["end01"], ["STRING"])
+  ma_util.add_table_to_gamedata(gamedata, "type", ["goodie"], ["STRING"])
+  ma_util.add_table_to_gamedata(gamedata, "goodietype", ["secret chip"], ["STRING"])
   init_shape_game_data_list.append([init, shape, gamedata])
   
 
