@@ -72,8 +72,6 @@ def wld_folder_to_init_shape_gamedata(directory) :
   init_header.data['item_count'] = len(init_shape_game_data_list)
   return preinit, header, init_header, init_shape_game_data_list
 
-
-
 def roundup(x):
   return int(math.ceil(x / 16.0)) * 16
 
@@ -117,3 +115,113 @@ class Vector:
     raw += struct.pack(float_endian, self.y)
     raw += struct.pack(float_endian, self.z)
     return raw
+
+def default_init():
+  init = Empty()
+  init.__class__ = init_classes.InitObject
+  init.data = {}
+  init.data['offset'] = 0
+  init.data['shape_type'] = "FWORLD_SHAPETYPE_MESH"
+  init.data['shape_offset'] = -1
+  #default orientation
+  init.data['Right_X'] = 1.
+  init.data['Right_Y'] = 0.
+  init.data['Right_Z'] = 0.
+  init.data['Up_X'] = 0.
+  init.data['Up_Y'] = 1.
+  init.data['Up_Z'] = 0.
+  init.data['Front_X'] = 0.
+  init.data['Front_Y'] = 0.
+  init.data['Front_Z'] = 1.
+  init.data['Position_X'] = 0
+  init.data['Position_Y'] = 0
+  init.data['Position_Z'] = 0
+  init.data['shape_index'] = -1
+  init.data['pointer_to_game_data'] = 0
+  return init
+
+def default_mesh_shape():
+  shape = Empty()
+  shape.__class__ = init_classes.ShapeData
+  shape.data = {}
+
+  shape.shape_type = "FWORLD_SHAPETYPE_MESH"
+  shape.data['offset'] = -1
+
+  shape.data['mesh'] = Empty()
+  shape.data['mesh'].__class__ = init_classes.Mesh
+  shape.data['mesh'].mesh_offset = -1
+  shape.data['mesh'].mesh_name = "goshcrate02"
+  shape.data['mesh'].lightmap_names = []
+  shape.data['mesh'].lightmap_offsets = [0,0,0,0]
+  shape.data['mesh'].lightmap_motifs = [0,0,0,0]
+  shape.data['mesh'].flags = 0
+  shape.data['mesh'].cull_distance = 1.0000000150474662e+30
+  shape.data['mesh'].tint = Empty()
+  shape.data['mesh'].tint.__class__ = Vector
+  shape.data['mesh'].tint.dimensions = 3
+  shape.data['mesh'].tint.x = 1.0
+  shape.data['mesh'].tint.y = 1.0
+  shape.data['mesh'].tint.z = 1.0
+  shape.data['mesh'].color_stream_count = 0
+  shape.data['mesh'].color_stream_offset = 0
+
+  return shape
+
+def default_point_shape():
+  shape = Empty()
+  shape.__class__ = init_classes.ShapeData
+  shape.data = {}
+  shape.shape_type = "FWORLD_SHAPETYPE_POINT"
+  shape.data['offset'] = -1
+  return shape
+
+def default_gamedata():
+  gamedata = Empty()
+  gamedata.__class__ = init_classes.GameDataHeader
+  gamedata.data = {}
+  gamedata.data['offset'] = -1
+  gamedata.data['size'] = -1
+  gamedata.data['number_of_tables'] = 0
+  gamedata.data['pointer_to_tables'] = 0
+  gamedata.data['flags'] = 0
+  gamedata.tables=[]
+  return gamedata
+
+def add_table_to_gamedata(gamedata, table_name, values, var_types):
+  table = Empty()
+  table.__class__ = init_classes.GameDataTable
+  table.data = {}
+  table.fields = []
+  table.data['offset'] = -1
+  table.data['header_offset'] = -1
+  table.data['keystring_pointer'] = -1
+  table.data['keystring_length'] = len(table_name)
+  table.data['num_fields'] = len(values)
+  table.data['table_index'] = -1
+  table.data['field_offset'] = -1
+  table.data['keystring'] = table_name.encode('ascii')
+  #now add fields
+  for value, var_type in zip(values, var_types):
+    field = Empty()
+    field.__class__ = init_classes.GameDataField
+    field.data = {}
+    field.data['offset'] = -1
+    field.data['data_type'] = var_type
+    if var_type == "FLOAT":
+      field.data['float'] = value
+      field.data['string_length'] = 0
+    elif var_type == "STRING":
+      field.data['string_pointer'] = -1
+      field.data['string_length'] = len(value)
+      field.data['string'] = value.encode('ascii')
+    elif var_type == "WIDESTRING":
+      field.data['widestring_pointer'] = -1
+      field.data['string_length'] = len(value)
+      field.data['widestring'] = value.encode('utf-8')
+    else:
+      print ('INVALID var type')
+      return None
+    table.fields.append(field)
+  gamedata.tables.append(table)
+

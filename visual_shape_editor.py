@@ -4,7 +4,7 @@ import tkinter.filedialog
 import json
 import math
 from enum import Enum
-from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu
+from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu, edit_pane
 
 fpath=os.path.dirname(os.path.realpath(__file__))
 photo_dir=os.path.join(fpath,"images")
@@ -33,6 +33,7 @@ if __name__ == "__main__":
   #forward declarations because hack
   image_canvas = None
   button_menu = None
+  right_edit_pane = None
   def zoom_in():
     global scale
     scale = scale * (1+scale_rate_of_change)
@@ -67,7 +68,7 @@ if __name__ == "__main__":
         shape_list = image_canvas.get_objects_at_pixel(event.x,event.y)
         selected_objects = shape_list
         print("found:", len(shape_list), "objects")
-        button_menu.set_selection(shape_list)
+        right_edit_pane.set_selection(shape_list)
         #also display popup if there are selected shapes
         if len(shape_list):
           popup_menu = tkinter.Menu(image_canvas.frame,
@@ -88,8 +89,8 @@ if __name__ == "__main__":
 
     elif state == State.MOVE:
       #get selected shape
-      value = button_menu.selected_object.get()
-      index = button_menu.get_object_index(value)
+      value = right_edit_pane.selected_object.get()
+      index = right_edit_pane.get_object_index(value)
       init = selected_objects[index][0]
       init.data["Position_X"], init.data["Position_Z"] = image_canvas.pixel_to_wld_coords(event.x, event.y)
       image_canvas.redraw()
@@ -97,8 +98,8 @@ if __name__ == "__main__":
       #reset state
       state = State.SELECTION
     elif state == State.ROTATE:
-      value = button_menu.selected_object.get()
-      index = button_menu.get_object_index(value)
+      value = right_edit_pane.selected_object.get()
+      index = right_edit_pane.get_object_index(value)
       init = selected_objects[index][0]
       original_x = selected_objects[index][0].data["Position_X"]
       original_z = selected_objects[index][0].data["Position_Z"]
@@ -123,8 +124,19 @@ if __name__ == "__main__":
 
 
   def dropdown_update(var, idx, mode):
-    value = button_menu.selected_object.get()
-    index = button_menu.get_object_index(value)
+    value = right_edit_pane.selected_object.get()
+    index = right_edit_pane.get_object_index(value)
+    if len(selected_objects):
+      right_edit_pane.update_fields(selected_objects[index])
+    else:
+      right_edit_pane.clear_fields()
+      
+  
+  def save_shape():
+    if len(selected_objects):
+      print("Saving Shape")
+      right_edit_pane.update_shape()
+      image_canvas.redraw()
   
   def map_update(var, idx, mode):
     loaded_map = maps[top_menu.get_selected_map()]
@@ -171,12 +183,13 @@ if __name__ == "__main__":
 
   #load shapes
   tk = tkinter.Tk()
-  tk.geometry("600x600")
+  tk.geometry("800x600")
   tk.columnconfigure(0, weight=1)
   tk.rowconfigure(0, weight=1)
   tk.title(window_title + " - " + no_file_message)
   image_canvas = imagecanvas.ImageCanvas(tk, loaded_map, photo_dir, 0,0, left_click_callback)
   top_menu = top_menu.Top_Menu(tk, 1, 0, open_wld, map_update, maps, save_wld)
-  button_menu = menu.Menu(tk, 2, 0, zoom_in, zoom_out, add_object, add_grid, dropdown_update)
+  right_edit_pane = edit_pane.Edit_Pane(tk,0,1, dropdown_update, save_shape)
+  button_menu = menu.Menu(tk, 2, 0, zoom_in, zoom_out, add_object, add_grid)
   tk.mainloop()
 

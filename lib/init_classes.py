@@ -29,6 +29,15 @@ shape_value = {"FWORLD_SHAPETYPE_POINT" : 0,
   "FWORLD_SHAPETYPE_MESH" : 6,
   "FWORLD_SHAPETYPE_COUNT" : 7}
 
+human_readable_shape_value = {"FWORLD_SHAPETYPE_POINT" : "Point",
+  "FWORLD_SHAPETYPE_LINE" : "Line",
+  "FWORLD_SHAPETYPE_SPLINE" : "Spline",
+  "FWORLD_SHAPETYPE_BOX" : "Box",
+  "FWORLD_SHAPETYPE_SPHERE" : "Sphere",
+  "FWORLD_SHAPETYPE_CYLINDER" : "Cylinder",
+  "FWORLD_SHAPETYPE_MESH" : "Mesh",
+  "FWORLD_SHAPETYPE_COUNT" : "N/A"}
+
 csv_datatype = [
   "STRING",
   "FLOAT",
