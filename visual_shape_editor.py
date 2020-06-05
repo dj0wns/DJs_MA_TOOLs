@@ -6,7 +6,7 @@ import math
 import jsonpickle
 from enum import Enum
 from threading import Lock
-from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu, edit_pane, add_object_dialog
+from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, edit_pane, add_object_dialog
 
 fpath=os.path.dirname(os.path.realpath(__file__))
 photo_dir=os.path.join(fpath,"images")
@@ -38,7 +38,6 @@ if __name__ == "__main__":
   tk = tkinter.Tk()
   tk.geometry("1000x600")
   image_canvas = None
-  button_menu = None
   right_edit_pane = None
   
   def popup_message(text):
@@ -269,8 +268,8 @@ if __name__ == "__main__":
   
 
   image_canvas = imagecanvas.ImageCanvas(left_frame, loaded_map, photo_dir, 0,0, left_click_callback)
-  top_menu = top_menu.Top_Menu(left_frame, 1, 0, open_wld, map_update, maps, save_wld)
-  button_menu = menu.Menu(left_frame, 2, 0, zoom_in, zoom_out, add_object, add_grid)
+  top_menu = menu.Top_Menu(left_frame, 1, 0, open_wld, map_update, maps, save_wld,
+                           zoom_in, zoom_out, add_object, add_grid)
   
   right_edit_pane = edit_pane.Edit_Pane(tk,0,1, dropdown_update, save_shape)
   

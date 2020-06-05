@@ -26,7 +26,7 @@ class Edit_Pane:
     self.selected_object_menu.grid(row=0, column=0, sticky='n')
 
     save_shape_button = tkinter.Button(self.frame, text="Save Shape", command=save_shape)
-    save_shape_button.grid(row=3, column=0, sticky='se')
+    save_shape_button.grid(row=3, column=0, sticky='s')
 
   #updates local shape with the values in the text boxes
   def update_shape(self):
