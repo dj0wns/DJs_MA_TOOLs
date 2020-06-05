@@ -67,6 +67,11 @@ if __name__ == "__main__":
     if not len(shape_name):
       popup_message("Name must be at least 1 character")
       return
+    #check if name is already in use
+    for isgn in init_shape_gamedata:
+      if isgn[3].lower() == shape_name.lower():
+        popup_message("Name is already in use")
+        return
     #add template to list of shapes and redraw
     shape = None
     init = None
