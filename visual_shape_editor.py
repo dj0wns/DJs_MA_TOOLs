@@ -3,8 +3,9 @@ import tkinter
 import tkinter.filedialog
 import json
 import math
+import jsonpickle
 from enum import Enum
-from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu, edit_pane
+from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu, edit_pane, add_object_dialog
 
 fpath=os.path.dirname(os.path.realpath(__file__))
 photo_dir=os.path.join(fpath,"images")
@@ -31,9 +32,19 @@ dir_name = None
 
 if __name__ == "__main__":
   #forward declarations because hack
+  tk = tkinter.Tk()
+  tk.geometry("1000x600")
   image_canvas = None
   button_menu = None
   right_edit_pane = None
+  
+  def popup_message(text):
+    top = tkinter.Toplevel(tk)
+    tkinter.Label(top, text=text).pack()
+    tkinter.Button(top, text="Okay", command = top.destroy).pack()
+    tk.wait_window(top)
+
+
   def zoom_in():
     global scale
     scale = scale * (1+scale_rate_of_change)
@@ -48,8 +59,59 @@ if __name__ == "__main__":
       scale = min_scale
     image_canvas.set_scale(scale)
 
+  def add_object_response(template_name, shape_name):
+    #make sure shape_name is valid
+    if "_" in shape_name:
+      popup_message("No underscores allows in name")
+      return
+    if not len(shape_name):
+      popup_message("Name must be at least 1 character")
+      return
+    #add template to list of shapes and redraw
+    shape = None
+    init = None
+    gamedata = None
+    for file in os.listdir(template_dir):
+      if file.startswith(template_name):
+        if file.endswith("_init_object.json"):
+          print("found init")
+          init_object_packed = open(os.path.join(template_dir, file), "rb").read()
+          init = jsonpickle.decode(init_object_packed)
+        elif file.endswith("_shape.json"):
+          print("found shape")
+          shape_packed = open(os.path.join(template_dir, file), "rb").read()
+          shape = jsonpickle.decode(shape_packed)
+        elif file.endswith("_gamedata.json"):
+          print("found gamedata")
+          gamedata = ma_util.Empty()
+          gamedata.__class__ = init_classes.GameDataHeader
+          gamedata_json = open(os.path.join(template_dir, file), "r").read()
+          gamedata.from_json(gamedata_json)
+    #update location 
+    x, z = image_canvas.get_visible_center_game_point()
+    init.data["Position_X"] = x
+    init.data["Position_Z"] = z
+    init_shape_gamedata.append([init, shape, gamedata, shape_name])
+    image_canvas.redraw()
+
+
+
+
   def add_object():
-    image_canvas.add_object()
+    if dir_name is None:
+      popup_message("No wld open")
+      return
+    if init_shape_gamedata is None:
+      popup_message("No Shapes")
+      return
+    #Get template list
+    template_list = []
+    for file in os.listdir(template_dir):
+      if file.endswith("_init_object.json"):
+        template_list.append(file[:-17])
+        
+    d = add_object_dialog.Add_Object_Dialog(tk, template_list, add_object_response)
+    tk.wait_window(d.top)
 
   def add_grid():
     image_canvas.add_grid(100)
@@ -58,7 +120,7 @@ if __name__ == "__main__":
     if init_shape_gamedata is not None:
       image_canvas.draw_objects(init_shape_gamedata)
     else :
-      print("Open a file first")
+      popup_message("Open a file first")
 
   def left_click_callback(event):
     global state
@@ -154,10 +216,10 @@ if __name__ == "__main__":
   
   def save_wld():
     if dir_name is None:
-      print("No dir opened")
+      popup_message("No dir opened")
       return
     if init_shape_gamedata is None:
-      print("No Shapes")
+      popup_message("No Shapes")
       return
     
     for item in init_shape_gamedata:
@@ -182,8 +244,6 @@ if __name__ == "__main__":
 
 
   #load shapes
-  tk = tkinter.Tk()
-  tk.geometry("1000x600")
   tk.grid_columnconfigure(0, weight=1)
   tk.grid_columnconfigure(1, weight=0)
   tk.grid_rowconfigure(0, weight=1)

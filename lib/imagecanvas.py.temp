@@ -18,6 +18,8 @@ class ImageCanvas:
     self.map_info = map_info
     self.frame = tkinter.Frame(root, bd=2, relief=tkinter.SUNKEN)
     self.frame.grid(row=gridx, column=gridy, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
+    self.frame.grid_rowconfigure(0, weight=2)
+    self.frame.grid_columnconfigure(0, weight=2)
     
     xscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.HORIZONTAL)
     yscrollbar = tkinter.Scrollbar(self.frame, orient=tkinter.VERTICAL)
@@ -28,9 +30,6 @@ class ImageCanvas:
     self.canvas = tkinter.Canvas(self.frame, bd=2, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, \
                                  xscrollincrement = 10, yscrollincrement = 10)
     self.canvas.grid(row=0, column=0, sticky=tkinter.N+tkinter.S+tkinter.E+tkinter.W)
-    
-    self.frame.grid_rowconfigure(0, weight=1)
-    self.frame.grid_columnconfigure(0, weight=1)
    
     self.orig_img = PIL.Image.open(os.path.join(photo_dir, map_info.data["file_name"]))
 
@@ -43,11 +42,6 @@ class ImageCanvas:
     self.canvas.bind("<Button 1>", left_click_callback)
     self.canvas.bind("<Button 3>", self.grab)
     self.canvas.bind("<B3-Motion>", self.drag)
-    
-  def get_visible_center_game_point(self):
-
-    print(str(self.frame.winfo_height()/2), str(self.frame.winfo_width()/2))
-    return  self.pixel_to_wld_coords(self.frame.winfo_width()/2, self.frame.winfo_height()/2)
 
   def pixel_to_wld_coords(self, x, y):
     canvas_x = self.canvas.canvasx(x)
@@ -137,7 +131,7 @@ class ImageCanvas:
       y_1 = slope*x_dim + b
       line = ((0,y_0), (x_dim, y_1))
     self.draw.line(line, fill=(255,128,255,255), width=line_width)
-
+  
   def draw_line(self, x, y, slope, x_dim, y_dim, line_width):
     b = y - x * slope
     if abs(slope) > 1:
@@ -151,6 +145,8 @@ class ImageCanvas:
       y_1 = slope*x_dim + b
       line = ((0,y_0), (x_dim, y_1))
     self.draw.line(line, fill=(255,255,255,255), width=line_width)
+    
+
 
   def add_grid(self, line_spacing):
     self.grid_size = line_spacing

@@ -65,7 +65,6 @@ class Edit_Pane:
     if self.gamedata_list is not None:
       #Recreate gamedata from scratch
       new_gamedata = ma_util.default_gamedata()
-      print (self.gamedata_list)
       for row in self.gamedata_list:
         elem = 0
         key = ""
