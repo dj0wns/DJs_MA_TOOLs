@@ -1,0 +1,12 @@
+{
+  "file_name": "we12multi12.png",
+  "level_name": "Matt's Big Gun Fun",
+  "x_dimension": 3840,
+  "y_dimension": 2160,
+  "x_center": 2048,
+  "y_center": 935,
+  "image_pixels_per_map_x": [2.7901256106071184, 0.2933655667430964],
+  "image_pixels_per_map_z": [0.17184228890439623, -2.8282574020536337],
+  "map_per_pixel_x": [0.35613166838747334, 0.036940332466130446],
+  "map_per_pixel_y": [0.02163822889762712, -0.35133014696421455]
+}

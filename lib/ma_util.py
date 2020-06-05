@@ -2,11 +2,75 @@ import jsonpickle
 import json
 import math
 import struct
+import os
 from . import init_classes
 
 # for building elements without constructor - probably should have written my constructors different but it is what it is
 class Empty(object):
   pass
+ 
+class init_shape_game_data:
+  def __init__(self):
+    self.init = None
+    self.gamedata = None
+    self.shape = None
+    self.name = None
+  def set_init(self, init):
+    self.init = init
+  def set_gamedata(self, gamedata):
+    self.gamedata = gamedata
+  def set_shape(self, shape):
+    self.shape = shape
+  def set_name(self, name):
+    self.name = name
+
+def wld_folder_to_init_shape_gamedata(directory) :
+  init_shape_game_data_dict = {}
+  init_shape_game_data_list = []
+  for filename in os.listdir(directory):
+    filepath = os.path.join(directory, filename)
+    if filename == "preinit.dat":
+      preinit = open(filepath, "rb").read()
+    elif filename == "header.json":
+      header_packed = open(filepath, "rb").read()
+      header = jsonpickle.decode(header_packed)
+    elif filename == "init_header.json":
+      init_header_packed = open(filepath, "rb").read()
+      init_header = jsonpickle.decode(init_header_packed)
+    elif "_init_object." in filename:
+      init_object_packed = open(filepath, "rb").read()
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_init(jsonpickle.decode(init_object_packed))
+      init_shape_game_data_dict[filename.split("_")[0]].set_name(filename.split("_")[0])
+
+    elif "_shape." in filename:
+      shape_packed = open(filepath, "rb").read()
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_shape(jsonpickle.decode(shape_packed))
+      #TODO Remove this hack - just zeroing out the color streams to see what happens and so you can edit campaign levels - This works with minor color errors so calling it a win until we can parse meshes
+      if init_shape_game_data_dict[filename.split("_")[0]].shape.shape_type == "FWORLD_SHAPETYPE_MESH":
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_count = 0
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_offset = 0
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].flags = 0
+
+    elif "_gamedata." in filename:
+      gamedata = Empty()
+      gamedata.__class__ = init_classes.GameDataHeader
+      gamedata_json = open(filepath, "r").read()
+      gamedata.from_json(gamedata_json)
+      if filename.split("_")[0] not in init_shape_game_data_dict:
+        init_shape_game_data_dict[filename.split("_")[0]] = init_shape_game_data()
+      init_shape_game_data_dict[filename.split("_")[0]].set_gamedata(gamedata)
+
+  #set dict to list form - should have used a dict earlier but dont want to rewrite it
+  #sort the keys
+  for key in sorted(init_shape_game_data_dict):
+    init_shape_game_data_list.append([init_shape_game_data_dict[key].init, init_shape_game_data_dict[key].shape, init_shape_game_data_dict[key].gamedata, init_shape_game_data_dict[key].name])
+
+  init_header.data['item_count'] = len(init_shape_game_data_list)
+  return preinit, header, init_header, init_shape_game_data_list
 
 def roundup(x):
   return int(math.ceil(x / 16.0)) * 16
@@ -81,6 +145,25 @@ def default_mesh_shape():
   shape.__class__ = init_classes.ShapeData
   shape.data = {}
   shape.shape_type = "FWORLD_SHAPETYPE_MESH"
+  shape.data['offset'] = -1
+
+  shape.data['mesh'] = Empty()
+  shape.data['mesh'].__class__ = init_classes.Mesh
+  shape.data['mesh'].mesh_offset = -1
+  shape.data['mesh'].mesh_name = "goshcrate02"
+  shape.data['mesh'].lightmap_names = []
+  shape.data['mesh'].lightmap_offsets = [0,0,0,0]
+  shape.data['mesh'].lightmap_motifs = [0,0,0,0]
+  shape.data['mesh'].flags = 0
+  shape.data['mesh'].cull_distance = 1.0000000150474662e+30
+  shape.data['mesh'].tint = Empty()
+  shape.data['mesh'].tint.__class__ = Vector
+  shape.data['mesh'].tint.dimensions = 3
+  shape.data['mesh'].tint.x = 1.0
+  shape.data['mesh'].tint.y = 1.0
+  shape.data['mesh'].tint.z = 1.0
+  shape.data['mesh'].color_stream_count = 0
+  shape.data['mesh'].color_stream_offset = 0
   return shape
 
 def default_point_shape():
@@ -103,7 +186,7 @@ def default_gamedata():
   gamedata.tables=[]
   return gamedata
 
-def add_table_to_gamedata(gamedata, table_name, values, var_type):
+def add_table_to_gamedata(gamedata, table_name, values, var_types):
   table = Empty()
   table.__class__ = init_classes.GameDataTable
   table.data = {}
@@ -117,7 +200,7 @@ def add_table_to_gamedata(gamedata, table_name, values, var_type):
   table.data['field_offset'] = -1
   table.data['keystring'] = table_name.encode('ascii')
   #now add fields
-  for value in values:
+  for value, var_type in zip(values, var_types):
     field = Empty()
     field.__class__ = init_classes.GameDataField
     field.data = {}
@@ -139,6 +222,3 @@ def add_table_to_gamedata(gamedata, table_name, values, var_type):
       return None
     table.fields.append(field)
   gamedata.tables.append(table)
-
-
-  

@@ -1,0 +1,41 @@
+{
+    "offset": 2437628,
+    "size": 664,
+    "number_of_tables": 13,
+    "pointer_to_tables": 16,
+    "flags": 0,
+    "name": [
+        "template"
+    ],
+    "type": [
+        "botgrunt"
+    ],
+    "ai_job": [
+        "wander"
+    ],
+    "AI_Aggression": [
+        100.0
+    ],
+    "AI_Intelligence": [
+        100.0
+    ],
+    "AI_Courage": [
+        100.0
+    ],
+    "NPCWeapon0": [
+        "laser"
+    ],
+    "NPCWeapon1": [
+        "grenade"
+    ],
+    "goodiebag": [
+        1.0,
+        "one"
+    ],
+    "goodie1": [
+        "washer",
+        5.0,
+        5.0,
+        1.0
+    ]
+}
