@@ -137,14 +137,13 @@ def default_init():
   init.data['Position_Y'] = 0
   init.data['Position_Z'] = 0
   init.data['shape_index'] = -1
-  init.data['pointer_to_game_data'] = 0
+  init.data['pointer_to_game_data'] = -1
   return init
 
 def default_mesh_shape():
   shape = Empty()
   shape.__class__ = init_classes.ShapeData
   shape.data = {}
-
   shape.shape_type = "FWORLD_SHAPETYPE_MESH"
   shape.data['offset'] = -1
 
@@ -165,7 +164,6 @@ def default_mesh_shape():
   shape.data['mesh'].tint.z = 1.0
   shape.data['mesh'].color_stream_count = 0
   shape.data['mesh'].color_stream_offset = 0
-
   return shape
 
 def default_point_shape():
@@ -224,4 +222,3 @@ def add_table_to_gamedata(gamedata, table_name, values, var_types):
       return None
     table.fields.append(field)
   gamedata.tables.append(table)
-

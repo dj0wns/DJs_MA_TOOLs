@@ -140,9 +140,7 @@ def build_wld_file(path, pre_init_data, initHeader, init_shape_game_data_list, s
   outfile.close()
 
 def import_from_folder(directory): 
-  #moved function to utils because it is also used for the visual editor
   return ma_util.wld_folder_to_init_shape_gamedata(directory)
-
 
 #this takes all values and makes a folder and sticks them in it
 def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_list):
@@ -214,40 +212,19 @@ def extract_to_file(writer, out_path, header, init_header, init_shape_game_data_
 
 def print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list):
   header.print_header()
-  #meshHeader.print_header()
   initHeader.print_header()
-  #for item in mesh_list:
-  #  item.print_header()
-  #for item in init_shape_game_data_list:
-  #  item[0].print_init()
-  #  item[1].pretty_print()
-  #  if item[2] is not None:
-  #    item[2].pretty_print()
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
-  endian = parser.add_mutually_exclusive_group()
-  endian.add_argument("-g", "--gamecube", help="Use gamecube endian - small endian", action="store_true")
-  endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
-  operation = parser.add_mutually_exclusive_group()
-  operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")
-  operation.add_argument("-r", "--rebuild", help="Rebuild a wld file from a folder full of extracted files", action="store_true")
-  parser.add_argument("-p", "--print", help="Print the structures to stdout", action="store_true")
-  parser.add_argument("input", help="input file or folder")
-  parser.add_argument("output", help="output file or folder")
-  args = parser.parse_args()
-
+def execute(is_big_endian, extract, rebuild, insert, print_data, input, output):
+  global endian
+  global float_endian
+  global int_endian
+  global short_endian
   #set endianess - xbox default
-  if args.gamecube:
+  if is_big_endian:
     endian='big'
     float_endian = '>f'
     int_endian = '>i'
     short_endian = '>h' 
-    #lazy but also set these in all sub classes
-    #mesh_classes.endian='big'
-    #mesh_classes.float_endian = '>f'
-    #mesh_classes.int_endian = '>i'
-    #mesh_classes.short_endian = '>h' 
     init_classes.endian='big'
     init_classes.float_endian = '>f'
     init_classes.int_endian = '>i'
@@ -257,43 +234,61 @@ if __name__ == '__main__':
     float_endian = '<f'
     int_endian = '<i'
     short_endian = '<h' 
-    #lazy but also set these in all sub classes
-    #mesh_classes.endian='little'
-    #mesh_classes.float_endian = '<f'
-    #mesh_classes.int_endian = '<i'
-    #mesh_classes.short_endian = '<h' 
     init_classes.endian='little'
     init_classes.float_endian = '<f'
     init_classes.int_endian = '<i'
     init_classes.short_endian = '<h' 
-
   #get input
-  if args.extract:
-    path = args.input
+  if extract or insert:
+    path = input
     writer = open(path, "rb")
     header, meshHeader, mesh_list, initHeader, init_shape_game_data_list = parse_wld_file(writer)
-  elif args.rebuild:
-    preinit, header, initHeader, init_shape_game_data_list = import_from_folder(args.input)
+  elif rebuild:
+    preinit, header, initHeader, init_shape_game_data_list = import_from_folder(input)
   else:
-    print("Must specify extract or rebuild")
+    print("Must specify extract or rebuild or insert")
     sys.exit()
-    
+  
+  if insert:
+    #replace shapes
+    _,_,_, init_shape_game_data_list = import_from_folder(output)
+    #get preinit
+    writer.seek(0)
+    preinit = bytearray(writer.read(header.data['offset_of_inits']))
+    #update initheader
+    initHeader.data['item_count'] = len(init_shape_game_data_list)
+    #output to the same file you read in from
+    output = input
 
-  #print
-  #TODO fix theses
   meshHeader=""
   mesh_list=[]
-  if args.print:
+  if print_data:
     print_classes(header, meshHeader, mesh_list, initHeader, init_shape_game_data_list)
     
-  #TODO remove this, just testing print
-  if args.extract:
-    extract_to_file(writer, args.output, header, initHeader, init_shape_game_data_list)
-  elif args.rebuild:
+  if extract:
+    extract_to_file(writer, output, header, initHeader, init_shape_game_data_list)
+  elif rebuild or insert:
     lightmap_name_locations_dict = {}
     #ALWAYS RUN THIS TWICE SO YOU CAN UPDATE OFFSETS
-    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
-    build_wld_file(args.output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
+    build_wld_file(output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
+    build_wld_file(output, preinit, initHeader, init_shape_game_data_list, header.data['offset_of_inits'] + 16, lightmap_name_locations_dict)
+
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description="Extract or rebuild a wld file")
+  parser_endian = parser.add_mutually_exclusive_group()
+  parser_endian.add_argument("-g", "--gamecube", help="Use gamecube endian - small endian", action="store_true")
+  parser_endian.add_argument("-x", "--xbox", help="Use xbox endian - big endian [Default]", action="store_true")
+  operation = parser.add_mutually_exclusive_group()
+  operation.add_argument("-e", "--extract", help="Extract the contents of a wld file to a directory", action="store_true")
+  operation.add_argument("-r", "--rebuild", help="Rebuild a wld file from a folder full of extracted files", action="store_true")
+  operation.add_argument("-i", "--insert", help="Inserts a folder full of shapes into the wld, overwriting the current shapes, put the .wld file as input and a folder containing shapes as output", action="store_true")
+  parser.add_argument("-p", "--print", help="Print the structures to stdout", action="store_true")
+  parser.add_argument("input", help="input file or folder")
+  parser.add_argument("output", help="output file or folder")
+  args = parser.parse_args()
+
+  execute(args.gamecube, args.extract, args.rebuild, args.insert, args.print, args.input, args.output)
   
 
   
