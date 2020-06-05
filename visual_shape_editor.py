@@ -5,6 +5,7 @@ import json
 import math
 import jsonpickle
 from enum import Enum
+from threading import Lock
 from lib import imagecanvas, menu, mapinfo, init_classes, ma_util, top_menu, edit_pane, add_object_dialog
 
 fpath=os.path.dirname(os.path.realpath(__file__))
@@ -29,6 +30,8 @@ class State(Enum):
 state = State.SELECTION
 selected_objects = None
 dir_name = None
+
+wld_lock = Lock()
 
 if __name__ == "__main__":
   #forward declarations because hack
@@ -212,34 +215,41 @@ if __name__ == "__main__":
   def open_wld():
     global init_shape_gamedata
     global dir_name
-    dir_name = tkinter.filedialog.askdirectory()
-    if dir_name:
-      # ma_util.wld_folder_to_init_shape_gamedata returns 4 objects, only care about the last one
-      init_shape_gamedata = ma_util.wld_folder_to_init_shape_gamedata(dir_name)[-1]
-      tk.title(window_title + " - " + os.path.basename(dir_name))
-      draw_objects()
+    with wld_lock:
+      dir_name = tkinter.filedialog.askdirectory()
+      if dir_name:
+        # ma_util.wld_folder_to_init_shape_gamedata returns 4 objects, only care about the last one
+        init_shape_gamedata = ma_util.wld_folder_to_init_shape_gamedata(dir_name)[-1]
+        tk.title(window_title + " - " + os.path.basename(dir_name))
+        draw_objects()
   
   def save_wld():
-    if dir_name is None:
-      popup_message("No dir opened")
-      return
-    if init_shape_gamedata is None:
-      popup_message("No Shapes")
-      return
-    
-    for item in init_shape_gamedata:
-      init_object_file = open(os.path.join(dir_name, item[3] + "_init_object.json"), "w")
-      init_object_file.write(ma_util.pretty_pickle_json(item[0]))
-      init_object_file.close()
-      if item[1] is not None:
-        shape_file = open(os.path.join(dir_name, item[3] + "_shape.json"), "w")
-        shape_file.write(ma_util.pretty_pickle_json(item[1]))
-        shape_file.close()
+    global init_shape_gamedata
+    with wld_lock:
+      if dir_name is None:
+        popup_message("No dir opened")
+        return
+      if init_shape_gamedata is None:
+        popup_message("No Shapes")
+        return
+      
+      for item in init_shape_gamedata:
+        init_object_file = open(os.path.join(dir_name, item[3] + "_init_object.json"), "w")
+        init_object_file.write(ma_util.pretty_pickle_json(item[0]))
+        init_object_file.close()
+        if item[1] is not None:
+          shape_file = open(os.path.join(dir_name, item[3] + "_shape.json"), "w")
+          shape_file.write(ma_util.pretty_pickle_json(item[1]))
+          shape_file.close()
 
-      if item[2] is not None:
-        gamedata_file = open(os.path.join(dir_name, item[3] + "_gamedata.json"), "w")
-        gamedata_file.write(item[2].to_json())
-        gamedata_file.close()
+        if item[2] is not None:
+          gamedata_file = open(os.path.join(dir_name, item[3] + "_gamedata.json"), "w")
+          gamedata_file.write(item[2].to_json())
+          gamedata_file.close()
+      #lastly reload wld because i cant figure out the duplicate bug
+      init_shape_gamedata = ma_util.wld_folder_to_init_shape_gamedata(dir_name)[-1]
+      draw_objects()
+
   
   #load maps
   maps = []
@@ -248,7 +258,6 @@ if __name__ == "__main__":
   loaded_map = maps[0]
 
 
-  #load shapes
   tk.grid_columnconfigure(0, weight=1)
   tk.grid_columnconfigure(1, weight=0)
   tk.grid_rowconfigure(0, weight=1)
