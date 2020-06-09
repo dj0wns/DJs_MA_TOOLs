@@ -7,7 +7,7 @@
 4. Start modding!
 
 ## visual\_wld\_editor.py ##
-Adding, removing and editting shapes is a breeze with this hot new wld editor. Fully featured and supporting a variety of maps(More to be added over time). This script has a full gui and allows for fairly accurate placement of shapes as well as complete control over all of their attributes.
+Adding, removing and editing shapes is a breeze with this hot new wld editor. Fully featured and supporting a variety of maps(More to be added over time). This script has a full gui and allows for fairly accurate placement of shapes in 2 dimensions as well as complete control over all of their attributes.
 
 ## mst\_extract.py ##
 mst\_extract.py extracts all files in the MST to the provided folder. This is how you get files to modify with the other scripts.
