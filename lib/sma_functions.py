@@ -1,7 +1,12 @@
 import ctypes
 import os
 dirname = os.path.dirname(__file__)
-small_lib_name = os.path.join(dirname, 'libsmall.so')
+
+if os.name == 'nt':
+#if windows
+  small_lib_name = os.path.join(dirname, 'libsmall.dll')
+else:
+  small_lib_name = os.path.join(dirname, 'libsmall.so')
 
 _small = ctypes.CDLL(small_lib_name)
 
