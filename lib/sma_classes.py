@@ -295,6 +295,15 @@ label_enum_to_data = {
   Labels.OP_PUSHADDR : label_data(1)
 }
 
+last_function = ""
+
+def int_array_to_string(arr):
+  string = ""
+  for i in range(0, len(arr),4):
+    if not arr[i]:
+      break;
+    string += chr(arr[i])
+  return string
 
 class AMXHeader:
   def __init__(self, reader):
@@ -454,7 +463,7 @@ class AMXInstruction:
     for item in self.data:
       print(item + " : " + str(self.data[item]))
   
-  def to_string(self, relative_index):
+  def to_string(self, relative_index, native_functions, data, arguments, last_function, pri_dict):
     out_string = str(relative_index[0]) + "," + str(self.data['offset']) + " : "
     relative_index[0] += op_len
     if self.data['opcode'] not in Labels._value2member_map_:
@@ -467,6 +476,41 @@ class AMXInstruction:
         out_string += str(arg)
         out_string += " "
         relative_index[0] += op_len
+      if self.data['opcode_name'] == "OP_SYSREQ_C":
+        out_string += "    # "
+        function = native_functions[self.data['args'][0]].data['name']
+        function += "("
+        for i in range(len(arguments)):
+          function += str(arguments[i])
+          if i + 1 < len(arguments):
+            function += ','
+        arguments.clear()
+        function += ")"
+        last_function[0] = function
+        out_string += function
+        out_string += ";"
+      elif self.data['opcode_name'] == "OP_PUSH_C":
+        value = int_array_to_string(data[self.data['args'][0]:])
+        if value:
+          out_string += "    # "
+          out_string += value
+          arguments.append(value)
+      elif self.data['opcode_name'] == "OP_PUSH":
+        value = "pri[" + str(self.data['args'][0]) + "]"
+        out_string += "    # "
+        out_string += value
+        if self.data['args'][0] in pri_dict.keys():
+          function = " - result of "
+          function += pri_dict[self.data['args'][0]]
+          out_string += function
+        arguments.append(value)
+      elif self.data['opcode_name'] == "OP_STOR_PRI":
+        value = self.data['args'][0]
+        out_string += "    # stored at pri["
+        out_string += str(value)
+        out_string += "]"
+        pri_dict[value] = last_function[0]
+        
     out_string += "\n"
     return out_string
 
