@@ -4,6 +4,18 @@ import math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from lib import init_classes, ma_util
 
+def create_mil_of_type(x, y, z, bottype, weapon_name, secondary_name, has_shield):
+  init = ma_util.default_init()
+  init.data['shape_type'] = "FWORLD_SHAPETYPE_POINT"
+  init.data['Position_X'] = x
+  init.data['Position_Y'] = y 
+  init.data['Position_Z'] = z
+  shape = ma_util.default_point_shape()
+  gamedata = ma_util.default_gamedata()
+  ma_util.add_table_to_gamedata(gamedata, "name", ["start01"], ["STRING"])
+  init_shape_game_data_list.append([init, shape, gamedata])
+
+
 
 def create_shape_at_center_of_2_points(x_0, z_0, x_1, z_1, center_x, center_z):
     wall_center_x = (x_0 + center_x + x_1 + center_x) / 2.
