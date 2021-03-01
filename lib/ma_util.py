@@ -137,13 +137,14 @@ def default_init():
   init.data['Position_Y'] = 0
   init.data['Position_Z'] = 0
   init.data['shape_index'] = -1
-  init.data['pointer_to_game_data'] = -1
+  init.data['pointer_to_game_data'] = 0
   return init
 
 def default_mesh_shape():
   shape = Empty()
   shape.__class__ = init_classes.ShapeData
   shape.data = {}
+
   shape.shape_type = "FWORLD_SHAPETYPE_MESH"
   shape.data['offset'] = -1
 
