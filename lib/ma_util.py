@@ -53,7 +53,10 @@ def wld_folder_to_init_shape_gamedata(directory) :
       if init_shape_game_data_dict[filename.split("_")[0]].shape.shape_type == "FWORLD_SHAPETYPE_MESH":
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_count = 0
         init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].color_stream_offset = 0
-        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].flags = 0
+        flags = init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].flags
+        if flags & 0x80:
+          flags -= 0x80
+        init_shape_game_data_dict[filename.split("_")[0]].shape.data['mesh'].flags = flags
 
     elif "_gamedata." in filename:
       gamedata = Empty()
