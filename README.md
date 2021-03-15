@@ -119,3 +119,25 @@ optional arguments:
   -r, --rebuild  Rebuild a sma file from a folder full of extracted files
   -p, --print    Print the structures to stdout
 ```
+
+### sma\_extractor.py ###
+
+EXPERIMENTAL - currently only fully supports .gci files, xbox saves are untested and probably dont work.
+
+```
+usage: save_extractor.py [-h] [-g | -x] [-e | -r] [-p] input output
+
+Extract or rebuild a profile save file
+
+positional arguments:
+  input           input file
+  output          output file
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -g, --gamecube  Use gamecube endian - small endian - .gci
+  -x, --xbox      Use xbox endian - big endian [Default] - .bin
+  -e, --extract   Extract the contents of a profile to an old save file
+  -r, --rebuild   Rebuild a profile save from an extracted file
+  -p, --print     Print the structures to stdout
+``` 
