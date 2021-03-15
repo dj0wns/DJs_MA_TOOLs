@@ -120,7 +120,7 @@ optional arguments:
   -p, --print    Print the structures to stdout
 ```
 
-### sma\_extractor.py ###
+### save\_extractor.py ###
 
 EXPERIMENTAL - currently only fully supports .gci files, xbox saves are untested and probably dont work.
 
