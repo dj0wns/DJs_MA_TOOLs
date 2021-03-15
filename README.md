@@ -24,6 +24,9 @@ csv\_rebuilder.py takes input of a csv file extracted with mst\_extract.py and r
 ## sma\_extractor.py ##
 sma\_extractor.py takes input of a sma file extracted with mst\_extract.py and outputs an assembly like representation. After editing, sma\_extractor.py can rebuild this script into a valid sma script that can be inserted into the MST.
 
+## save\_extractor.py ##
+save\_extractor.py takes input of a save file and converts it to a mostly human readable and editable json. Then using the same save file you exported from as an output, can rebuild a new save with your changes as a .new file.
+
 ## Usage ##
 
 ### mst\_extract.py ###
