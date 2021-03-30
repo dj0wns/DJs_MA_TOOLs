@@ -44,6 +44,8 @@ class CSVLoader(Loader):
                     tmp_pos = reader.pos
                     reader.seek(self.entry.location + str_loc)
                     str_val = reader.read_str(str_len)
+                    str_val = str_val.replace('\n', "\\n")
+                    str_val = str_val.replace(",", "\\;")
                     reader.seek(tmp_pos)
                     values.append(str_val)
                 elif val_type == 1:  # number(float)
@@ -58,6 +60,8 @@ class CSVLoader(Loader):
                       str_val += reader.handle.read(str_len * 2).decode('utf-16le')
                     else:
                       str_val += reader.handle.read(str_len * 2).decode('utf-16be')
+                    str_val = str_val.replace('\n', "\\n")
+                    str_val = str_val.replace(",", "\\;")
                     str_val += "\n"
 
 
