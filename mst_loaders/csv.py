@@ -53,10 +53,13 @@ class CSVLoader(Loader):
                     str_loc, str_len = reader.read_fmt('II')
                     tmp_pos = reader.pos
                     reader.seek(self.entry.location + str_loc)
+                    str_val = "|"
                     if reader.little_endian:
-                      str_val = reader.handle.read(str_len * 2).decode('utf-16le')
+                      str_val += reader.handle.read(str_len * 2).decode('utf-16le')
                     else:
-                      str_val = reader.handle.read(str_len * 2).decode('utf-16be')
+                      str_val += reader.handle.read(str_len * 2).decode('utf-16be')
+                    str_val += "\n"
+
 
                     reader.seek(tmp_pos)
                     values.append(str_val)
