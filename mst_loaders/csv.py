@@ -69,14 +69,19 @@ class CSVLoader(Loader):
                     values.append(str_val)
                 else:
                     raise Exception('malformed CSV')
-
-            out_dict[key] = values
+            keystring = key[:]
+            i = 0
+            while keystring in out_dict:
+              keystring = key + "__" + str(i)
+              i+=1
+            out_dict[keystring] = values
 
         self.data = out_dict
 
     def save(self, handle):
         for key in self.data.keys():
-          handle.write(key.encode('ascii', 'ignore'))
+          keystring = key.split("__")[0]
+          handle.write(keystring.encode('ascii', 'ignore'))
           handle.write(",".encode())
           for item in self.data[key]:
             if isinstance(item, str):
