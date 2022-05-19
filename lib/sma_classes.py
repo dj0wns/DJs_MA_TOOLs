@@ -2,6 +2,7 @@ import struct
 import os
 import sys
 import json
+import math
 from enum import Enum
 
 from . import ma_util, sma_functions
@@ -463,7 +464,7 @@ class AMXInstruction:
     for item in self.data:
       print(item + " : " + str(self.data[item]))
   
-  def to_string(self, relative_index, native_functions, data, arguments, last_function, pri_dict):
+  def to_string(self, relative_index, native_functions, data, arguments, last_function, pri_dict, last_push_c):
     out_string = str(relative_index[0]) + "," + str(self.data['offset']) + " : "
     relative_index[0] += op_len
     if self.data['opcode'] not in Labels._value2member_map_:
@@ -480,21 +481,33 @@ class AMXInstruction:
         out_string += "    # "
         function = native_functions[self.data['args'][0]].data['name']
         function += "("
-        for i in range(len(arguments)):
+        #a value prepends function calls which says how many arguments it uses
+        arg_count = math.floor(last_push_c[0]/4);
+        #remove last_push_c since its not a real argument
+        arguments.pop()
+        count = 0
+        for i in reversed(range(len(arguments) - arg_count, len(arguments))):
+          count += 1
           function += str(arguments[i])
-          if i + 1 < len(arguments):
+          if count < arg_count:
             function += ','
-        arguments.clear()
+          arguments.pop()
         function += ")"
         last_function[0] = function
         out_string += function
         out_string += ";"
       elif self.data['opcode_name'] == "OP_PUSH_C":
         value = int_array_to_string(data[self.data['args'][0]:])
+        last_push_c[0] = self.data['args'][0]
         if value:
-          out_string += "    # "
-          out_string += value
-          arguments.append(value)
+          out_string += "    # \""
+          var_string = value
+          var_string += "\" or "
+          var_string += str(self.data['args'][0])
+          out_string += var_string
+          arguments.append(var_string)
+        else:
+          arguments.append(self.data['args'][0])
       elif self.data['opcode_name'] == "OP_PUSH":
         value = "pri[" + str(self.data['args'][0]) + "]"
         out_string += "    # "
@@ -503,6 +516,13 @@ class AMXInstruction:
           function = " - result of "
           function += pri_dict[self.data['args'][0]]
           out_string += function
+          arguments.append(value + " /*" + pri_dict[self.data['args'][0]] + "*/")
+        else:
+          arguments.append(value)
+      elif self.data['opcode_name'] == "OP_PUSH_PRI":
+        value = last_function[0]
+        out_string += "    # result of "
+        out_string += value
         arguments.append(value)
       elif self.data['opcode_name'] == "OP_STOR_PRI":
         value = self.data['args'][0]

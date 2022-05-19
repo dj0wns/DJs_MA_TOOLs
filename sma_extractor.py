@@ -189,6 +189,7 @@ def export_to_folder(out_path, header, public_functions, native_functions, libra
   
   pri_dict = {}
   last_function = [""]
+  last_push_c = [0]
   #write disass files
   for i in range(len(public_functions)):
     fname = "publicfunction" + delimiter + str(i).zfill(3) + delimiter + public_functions[i].data['name'] + ".disass"
@@ -196,7 +197,7 @@ def export_to_folder(out_path, header, public_functions, native_functions, libra
     relative_line = [0]
     arguments = []
     for instruction in public_functions[i].data['instructions']:
-      f.write(instruction.to_string(relative_line, native_functions, data, arguments, last_function, pri_dict))
+      f.write(instruction.to_string(relative_line, native_functions, data, arguments, last_function, pri_dict, last_push_c))
     f.close()
 
 def import_from_folder(directory):
