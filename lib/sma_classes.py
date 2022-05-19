@@ -500,8 +500,9 @@ class AMXInstruction:
         value = int_array_to_string(data[self.data['args'][0]:])
         last_push_c[0] = self.data['args'][0]
         if value:
-          out_string += "    # \""
-          var_string = value
+          out_string += "    # "
+          var_string = '"'
+          var_string += value
           var_string += "\" or "
           var_string += str(self.data['args'][0])
           out_string += var_string
