@@ -488,10 +488,14 @@ class AMXInstruction:
         count = 0
         for i in reversed(range(len(arguments) - arg_count, len(arguments))):
           count += 1
-          function += str(arguments[i])
+          if arguments:
+            function += str(arguments[i])
+            arguments.pop()
+          else:
+            #Somehow we have fewer arguments than we need
+            function += ("UNKNOWN")
           if count < arg_count:
             function += ','
-          arguments.pop()
         function += ")"
         last_function[0] = function
         out_string += function
