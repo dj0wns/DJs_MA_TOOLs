@@ -1,6 +1,9 @@
 import json
 
-from mst_loaders.base import Loader
+try:
+  from ..mst_loaders.base import Loader
+except:
+  from mst_loaders.base import Loader
 
 """
 Dump everything in the format:

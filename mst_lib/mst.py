@@ -1,7 +1,11 @@
 from enum import Enum
 import datetime
 
-from mst_loaders import get_loader
+try:
+  from ..mst_loaders import get_loader
+except:
+  from mst_loaders import get_loader
+
 from .misc import BinaryIO, ProtocolException
 
 
@@ -23,7 +27,7 @@ class MST:
   def __repr__(self):
     return 'MST({}, {} bytes, {} files)'.format(self.platform, self.package_size, self.file_count)
 
-  def read(self, reader: BinaryIO):
+  def read(self, reader: BinaryIO, disable_formatting):
     header = reader.read_str(4) # FANG
     if header == 'FANG': # Xbox, PS2
       reader.little_endian = True
@@ -50,7 +54,7 @@ class MST:
     self.files = []
     for i in range(self.file_count):
       file = MSTEntry()
-      file.read(reader, self.platform)
+      file.read(reader, self.platform, disable_formatting)
       self.files.append(file)
     return reader.little_endian
 
@@ -65,10 +69,10 @@ class MSTEntry:
     self.unknown = 0
     self.loader = None
 
-  def read(self, reader: BinaryIO, platform: GamePlatform):
+  def read(self, reader: BinaryIO, platform: GamePlatform, disable_formatting):
     name_length = 24 if platform == GamePlatform.playstation else 20
     self.name = reader.read_str(name_length).split('\0')[0] # important to re-add this when writing
     self.location, self.length, timestamp, self.unknown = reader.read_fmt('IIII')
     self.create_date = datetime.date.fromtimestamp(timestamp)
     ext = self.name.split('.')[-1].lower()
-    self.loader = get_loader(ext)(self)
+    self.loader = get_loader(ext, disable_formatting)(self)

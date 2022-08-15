@@ -15,6 +15,10 @@ endian = "little"
 pack_int = '<i'
 INT_BYTES=4
 STR_BYTES=20
+NUM_ENTRIES_OFFSET = 12
+NUM_FREE_ENTRIES_OFFSET=16
+ENTRY_LOCATION_OFFSET = 20
+ENTRY_SIZE_OFFSET = 24
 
 #A dirty file injector for msts
 
@@ -32,42 +36,82 @@ def entry_to_data(mst_data, idx):
   idx+=INT_BYTES
   return name, location, length, timestamp, crc, idx
 
-def parse_mst_header(reader):
+def parse_mst_header(data):
   global pack_int
-  offset = reader.tell()
-  reader.seek(0)
   mst = {}
-  mst['signature'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['size'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['num_entries'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['num_free_entries'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['num_support_entries'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['num_free_support_entries'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['data_offset'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['tga_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['ape_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['mtx_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['csv_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['fnt_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['sma_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['gt_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['wvb_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['fpr_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['cam_compiler_version'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_1'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_2'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_3'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_4'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_5'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_6'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_7'] = struct.unpack(pack_int, reader.read(4))[0]
-  mst['reserved_8'] = struct.unpack(pack_int, reader.read(4))[0]
-  reader.seek(offset)
+  idx = 0
+  mst['signature'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['size'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['num_entries'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['num_free_entries'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['num_support_entries'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['num_free_support_entries'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['data_offset'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['tga_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['ape_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['mtx_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['csv_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['fnt_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['sma_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['gt_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['wvb_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['fpr_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['cam_compiler_version'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_1'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_2'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_3'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_4'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_5'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_6'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_7'] = struct.unpack(pack_int, data[idx:idx+4])[0]
+  idx += 4
+  mst['reserved_8'] = struct.unpack(pack_int, data[idx:idx+4])[0]
   return mst
 
+def catalog_entries(mst):
+  header = parse_mst_header(mst)
+  entry_array = []
+  for i in range(header['num_entries']):
+    name = entry_to_data(mst, entry_index_to_offset(i))[0]
+    entry_array.append(name.decode('ascii', 'backslashreplace').split("\x00")[0]) #split on null byte to separate the null terminated string
+  return entry_array
+
+def write_mst_string(mst, offset, data):
+  mst[offset:offset+len(data)] = data
+
+def write_mst_int(mst, offset, data):
+  mst[offset:offset+INT_BYTES] = struct.pack(pack_int, data)
+
+def entry_index_to_offset(index):
+  return 108+36*index #header size + row size * num entries
+
 def first_free_row_offset(mst_header):
-  return 104+36*mst_header['num_entries'] #header size + row size * num entries
+  return entry_index_to_offset(mst_header['num_entries'])
 
 def roundup(x):
   return int(math.ceil(x / 4.0)) * 4
@@ -79,32 +123,32 @@ def add_buffer(data):
     data.append(0)
 
 
-def add_table_entry(mst_data, insert_file, insert_file_name, insert_reader, mst_reader):
-  mst_data_out = bytearray()
-  mst_data_out.extend(mst_data) # we are appending at end so add all of the mst up to this point
+def add_table_entry(mst_data, insert_file, insert_file_name, insert_reader):
+  mst_header = parse_mst_header(mst_data)
 
-  mst_header = parse_mst_header(mst_reader)
+  #update mst header, +1 entry, -1 free entry
+  write_mst_int(mst_data, NUM_ENTRIES_OFFSET, mst_header['num_entries']+1)
+  write_mst_int(mst_data, NUM_FREE_ENTRIES_OFFSET, mst_header['num_entries']+1)
+
+  original_size = len(mst_data)
+  #write inserted file to mst
+  mst_data.extend(insert_reader.read())
+
+  #Align
+  add_buffer(mst_data)
+
+  file_size = len(mst_data) - original_size
+
   # update relevant row
   row_offset = first_free_row_offset(mst_header)
   fname_bytes = insert_file_name.encode('ascii')
-  insert_file_size = os.path.getsize(insert_file)
-  mst_data_out[row_offset:row_offset + len(fname_bytes)] = fname_bytes #update name
-  mst_data_out[row_offset + 20: row_offset + 24] = struct.pack(pack_int,len(mst_data_out)) #update location, we are appending to the end!
-  mst_data_out[row_offset + 24: row_offset + 28] = struct.pack(pack_int,insert_file_size) #update size
+  write_mst_string(mst_data, row_offset, fname_bytes)
+  write_mst_int(mst_data, row_offset + ENTRY_LOCATION_OFFSET, original_size)
+  write_mst_int(mst_data, row_offset + ENTRY_SIZE_OFFSET, file_size)
 
-  #update mst header, +1 entry, -1 free entry
-  mst_data_out[12:16] = struct.pack(pack_int,mst_header['num_entries']+1)
-  mst_data_out[16:20] = struct.pack(pack_int,mst_header['num_free_entries']-1)
+  print(f'Inserted {insert_file_name} with new row entry of {entry_to_data(mst_data, row_offset)}')
 
-  #write inserted file to mst
-  mst_data_out.extend(insert_reader.read())
-
-  #Align
-  add_buffer(mst_data_out)
-
-  print(f'Inserted {insert_file_name} with new row entry of {entry_to_data(mst_data_out, row_offset)}')
-
-  return mst_data_out
+  return mst_data
 
 def replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, idx):
   mst_data_out = bytearray()
@@ -124,40 +168,37 @@ def replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, 
   #fill buffer
   add_buffer(mst_data_out)
 
+  #get resulting file length
+  new_length = len(mst_data_out) - original_location
+
   #write remainder of mst
   idx=original_location + original_length
   mst_data_out.extend(mst_data[idx:])
 
   #fix table of contents
-  new_length = os.path.getsize(insert_file)
-  mst_data_out[entry_location + 24: entry_location + 28] = struct.pack(pack_int,os.path.getsize(insert_file))
+  write_mst_int(mst_data_out, entry_location + ENTRY_SIZE_OFFSET, new_length)
 
   #update every following files location
   idx=12
   file_count = int.from_bytes(mst_data[idx:idx+INT_BYTES], endian)
-  idx+=INT_BYTES
-  idx=27 * 4 # start of toc
-  delta = roundup(new_length) - roundup(original_length)
+  delta = new_length - original_length
+  print (file_count)
   for i in range(file_count):
-    location_offset = idx + STR_BYTES
-    name, location, length, timestamp, crc, idx = entry_to_data(mst_data, idx)
+    entry_offset = entry_index_to_offset(i)
+    name, location, length, timestamp, crc, idx = entry_to_data(mst_data, entry_offset)
     #if its a following file
     if location > original_location:
-      mst_data_out[location_offset:location_offset+4] = struct.pack(pack_int,location+delta)
+      write_mst_int(mst_data_out, entry_offset + ENTRY_LOCATION_OFFSET, location+delta)
 
   return mst_data_out
 
-def insert(mst_data, insert_file, insert_file_name, insert_reader, mst_reader):
-  #search for file entry in mst
-  b = bytearray()
-  b.extend(map(ord, insert_file_name))
-  idx = mst_data.find(b)
-
-  if idx > 0:
-    return replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, idx)
+def insert(mst_data, insert_file, insert_file_name, insert_reader, entries):
+  print(insert_file_name)
+  if insert_file_name in entries:
+    idx = entries.index(insert_file_name)
+    return replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, entry_index_to_offset(idx))
   else:
-    return add_table_entry(mst_data, insert_file, insert_file_name, insert_reader, mst_reader)
-
+    return add_table_entry(mst_data, insert_file, insert_file_name, insert_reader)
 
 def execute(is_big_endian, mst, files, output_suffix):
   global endian
@@ -174,13 +215,15 @@ def execute(is_big_endian, mst, files, output_suffix):
   mst_data = mst_reader.read()
 
   mst_data = bytearray(mst_data)
+  print(parse_mst_header(mst_data))
+  entries = catalog_entries(mst_data)
 
   for i in range(len(files)):
     insert_file = files[i]
     insert_file_name = os.path.basename(insert_file)
     insert_reader = open(insert_file, "rb")
 
-    mst_data = insert(mst_data, insert_file, insert_file_name, insert_reader, mst_reader)
+    mst_data = insert(mst_data, insert_file, insert_file_name, insert_reader, entries)
     insert_reader.close()
 
   mst_writer = open(mst_out, "wb")
@@ -189,6 +232,8 @@ def execute(is_big_endian, mst, files, output_suffix):
   #Fix mst size
   mst_writer.seek(8,os.SEEK_SET)
   new_size = os.path.getsize(mst_out)
+  print(new_size)
+  print(parse_mst_header(mst_data))
   mst_writer.write(struct.pack(pack_int,new_size))
 
   mst_writer.close()
