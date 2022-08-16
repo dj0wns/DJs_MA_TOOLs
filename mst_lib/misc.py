@@ -28,7 +28,7 @@ class BinaryIO:
         return struct.unpack(real_fmt, buf)
 
     def read_str(self, length):
-        return self.handle.read(length).decode()
+        return self.handle.read(length).decode('utf-8', 'backslashreplace')
 
     def seek(self, location):
         self.handle.seek(location)  # from start by default
