@@ -103,7 +103,7 @@ item_tag_names = [
 # for building elements without constructor - probably should have written my constructors different but it is what it is
 class Empty(object):
   pass
- 
+
 class init_shape_game_data:
   def __init__(self):
     self.init = None

@@ -28,10 +28,10 @@ class CSVHeader:
   def __init__(self):
     self.tables = []
     self.flags = 0
-  
+
   def addTable(self, keystring, fields):
     self.tables.append(CSVTable(keystring, fields, len(self.tables)))
-  
+
   def pretty_print(self):
     #print csv
     print("--------------- Game Data CSV ---------------")
@@ -72,37 +72,39 @@ class CSVHeader:
       table_offset += size + len(table.fields) * 12 #data(strings) come after the keystring + fields
       table.data['field_offset'] = len(byteheader)
       #add fields
+      previous_type = ""
       for field in table.fields:
+        if field.data['string_length'] > 0 and previous_type == "WIDESTRING":
+          #adjust to weird widestring stuff
+          table_offset += 1
         new_bytes = field.to_bytes(table_offset)
         if field.data['string_length'] > 0:
           if field.data['data_type'] == "STRING":
             table_offset += field.data['string_length'] + 1
           elif field.data['data_type'] == "WIDESTRING":
             #round beginning
-            table_offset = ma_util.roundup_2(table_offset) 
-            table_offset += 2*(field.data['string_length'] + 1)
+            table_offset += 2*(field.data['string_length']) + 1
         byteheader += new_bytes
+        previous_type = field.data['data_type']
+
       #add field strings
       for field in table.fields:
+        new_bytes = bytearray()
+        if previous_type == "WIDESTRING":
+          new_bytes += b'\x00'
         if field.data['data_type'] == "STRING":
-          new_bytes = bytearray(field.data['string'].encode("utf-8"))
+          new_bytes += bytearray(field.data['string'].encode("utf-8"))
           new_bytes.append(0x0)
           byteheader += new_bytes
         elif field.data['data_type'] == "WIDESTRING":
-          #wide string appears to conform to 2 byte boundaries
-          toadd = ma_util.roundup_2(len(byteheader)) - len(byteheader)
-          for i in range(toadd):
-            byteheader += b'\x00'
+          #wide string appears to conform to 2 byte boundaries but only if previous type was a widestring
           if endian == "little":
-            new_bytes = bytearray(field.data['widestring'].encode("utf-16-le"))
-          else:  
-            new_bytes = bytearray(field.data['widestring'].encode("utf-16-be"))
+            new_bytes += bytearray(field.data['widestring'].encode("utf-16-le"))
+          else:
+            new_bytes += bytearray(field.data['widestring'].encode("utf-16-be"))
           new_bytes.append(0x0)
-          byteheader += new_bytes   
-          #wide string appears to conform to 2 byte boundaries, so pad beginning and end
-          toadd = ma_util.roundup_2(len(byteheader)) - len(byteheader)
-          for i in range(toadd):
-            byteheader += b'\x00'
+          byteheader += new_bytes
+        previous_type = field.data['data_type']
     return byteheader
 
 class CSVTable:
@@ -130,13 +132,12 @@ class CSVTable:
     size += ma_util.roundup_4(self.data['keystring_pointer'] + self.data['keystring_length']+1) - (self.data['keystring_pointer']); 
     size += self.child_size()
     return size;
-  
+
   def child_size(self):
     size = 0
     for field in self.fields:
       size += field.size()
     return size;
-    
 
   def header_to_bytes(self, keystring_pointer):
     byteheader = struct.pack(int_endian, keystring_pointer) #parent has to figure out where it goes because its managing the rebuild
@@ -153,10 +154,8 @@ class CSVTable:
     to_add = size - len(keystring)
     for i in range(to_add):
       keystring.append(0x0)
-     
     byteheader = keystring
     return byteheader, size
-    
 
 class CSVField:
   def __init__(self, keystring, field):
@@ -165,7 +164,16 @@ class CSVField:
       self.data['data_type'] = "FLOAT"
       self.data['float'] = float(field)
       self.data['string_length'] = 0
-    elif keystring.lower() == "missiontext":
+      return
+    #must be string so do any replacements
+    field = field.replace(";", ",")
+    if keystring.lower() == "missiontext":
+      self.data['data_type'] = "WIDESTRING"
+      self.data['widestring'] = field
+      self.data['string_length'] = len(field)
+    elif field[0] == '|':
+      # remove widestring qualifier
+      field = field[1:]
       self.data['data_type'] = "WIDESTRING"
       self.data['widestring'] = field
       self.data['string_length'] = len(field)
@@ -182,17 +190,17 @@ class CSVField:
       return self.data['widestring']
     else:
       return self.data['float']
-  
+
   def size(self):
     size = 12 #header size
     #if data is a string, dont forget to add 4 bytes for the offset
     if self.data['data_type'] == "STRING":
-      size += 1 
+      size += 1
       size += self.data['string_length'] #this string does not appear to be rounded up
     elif self.data['data_type'] == "WIDESTRING":
       size += 2*(self.data['string_length'] + 1) #wide strings are twice as wide
     return size;
-  
+
   def to_bytes(self, offset):
     byteheader = struct.pack(int_endian, csv_datavalue[self.data['data_type']])
     #data - either a pointer or a float
@@ -203,6 +211,6 @@ class CSVField:
     #string length
     if self.data['data_type'] == "STRING" or self.data['data_type'] == "WIDESTRING":
       byteheader += struct.pack(int_endian, self.data['string_length'])
-    else: 
+    else:
       byteheader += struct.pack(int_endian, 0) #no string, no offset
     return byteheader

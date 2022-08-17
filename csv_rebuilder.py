@@ -8,8 +8,11 @@ import math
 import collections
 import argparse
 import csv
-from lib import csv_classes
 
+try:
+  from .lib import csv_classes
+except:
+  from lib import csv_classes
 
 fpath=os.path.realpath(__file__)
 py_path=os.path.dirname(fpath)
@@ -21,7 +24,7 @@ STR_BYTES=20
 
 def parseError(error_string, line, index):
   sys.exit("Invalid line in csv. Line: " + str(line) + " - Index: " + str(index) + " " + error_string)
-  
+
 
 def iterateRow(line, row, current_keystring, current_fields, csv_header):
   for i in range(len(row)):
@@ -73,7 +76,7 @@ def execute(is_big_endian, print, input_csv, output_csv):
     csv_classes.short_endian = '<h'  
 
   input_reader = open(input_csv, newline='')
-  csv_reader = csv.reader(input_reader, delimiter=',')
+  csv_reader = csv.reader(input_reader, delimiter=',', escapechar="\\")
   
   csv_header = csv_classes.CSVHeader()
 
