@@ -1,6 +1,7 @@
 import zipfile
 import shutil
 import tempfile
+import shutil
 import os
 import argparse
 from distutils.util import strtobool
@@ -62,7 +63,7 @@ def execute(mst, modfile, newMST):
           if not value:
             break
           new_wld = input("Which .wld would you like to replace? ")
-          os.rename(wld_file, os.path.join(wld_tempdir, new_wld))
+          shutil.move(wld_file, os.path.join(wld_tempdir, new_wld))
           wld_file = os.path.join(wld_tempdir, new_wld)
           break
         files_to_insert.append(wld_file)
