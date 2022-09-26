@@ -33,7 +33,7 @@ def extract(mst_path, out_path, ignore_existing, file_to_extract, disable_format
         print('Skipping {0.name}'.format(file))
         continue
 
-      print('Writing {0.name} ({0.length} bytes) loader: {0.loader}'.format(file))
+      print('Writing {0.name} ({0.length} bytes @ {0.location}) loader: {0.loader}'.format(file))
       out_handle = open(file_out_path, 'wb')
       file.loader.read(br)
       file.loader.save(out_handle)

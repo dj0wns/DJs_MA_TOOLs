@@ -128,16 +128,20 @@ def add_table_entry(mst_data, insert_file, insert_file_name, insert_reader):
 
   #update mst header, +1 entry, -1 free entry
   write_mst_int(mst_data, NUM_ENTRIES_OFFSET, mst_header['num_entries']+1)
-  write_mst_int(mst_data, NUM_FREE_ENTRIES_OFFSET, mst_header['num_entries']+1)
+  write_mst_int(mst_data, NUM_FREE_ENTRIES_OFFSET, mst_header['num_free_entries']+1)
+
+  #Align pre if needed
+  add_buffer(mst_data)
 
   original_size = len(mst_data)
+
   #write inserted file to mst
   mst_data.extend(insert_reader.read())
 
-  #Align
-  add_buffer(mst_data)
-
   file_size = len(mst_data) - original_size
+
+  #Align post if needed
+  add_buffer(mst_data)
 
   # update relevant row
   row_offset = first_free_row_offset(mst_header)
@@ -150,11 +154,10 @@ def add_table_entry(mst_data, insert_file, insert_file_name, insert_reader):
 
   return mst_data
 
-def replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, idx):
+def replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, entry_location):
   mst_data_out = bytearray()
-  entry_location = idx
 
-  original_name, original_location, original_length, original_timestamp, original_crc, idx = entry_to_data(mst_data, idx)
+  original_name, original_location, original_length, original_timestamp, original_crc, idx = entry_to_data(mst_data, entry_location)
 
   print("Seek: " + str(idx))
   print("Original File: " + str(bytes(original_name).decode()) + ", location: " + str(original_location) + ", length: " + str(original_length) + ", timestamp: " + str(original_timestamp) + ", crc: " + str(original_crc))
@@ -165,24 +168,29 @@ def replace_table_entry(mst_data, insert_file, insert_file_name, insert_reader, 
   #write inserted file to mst
   mst_data_out.extend(insert_reader.read())
 
-  #fill buffer
-  add_buffer(mst_data_out)
+  #calculate old alignment (we want to swallow that and replace it with our own)
+  old_offset = roundup(original_length) - original_length
 
   #get resulting file length
-  new_length = len(mst_data_out) - original_location
+  new_file_length = len(mst_data_out) - original_location
+
+  #align
+  add_buffer(mst_data_out)
+
+  #get resulting total length
+  new_total_length = len(mst_data_out) - original_location
 
   #write remainder of mst
-  idx=original_location + original_length
+  idx=original_location + original_length + old_offset
   mst_data_out.extend(mst_data[idx:])
 
   #fix table of contents
-  write_mst_int(mst_data_out, entry_location + ENTRY_SIZE_OFFSET, new_length)
+  write_mst_int(mst_data_out, entry_location + ENTRY_SIZE_OFFSET, new_file_length)
 
   #update every following files location
   idx=12
   file_count = int.from_bytes(mst_data[idx:idx+INT_BYTES], endian)
-  delta = new_length - original_length
-  print (file_count)
+  delta = new_total_length - (original_length + old_offset)
   for i in range(file_count):
     entry_offset = entry_index_to_offset(i)
     name, location, length, timestamp, crc, idx = entry_to_data(mst_data, entry_offset)
