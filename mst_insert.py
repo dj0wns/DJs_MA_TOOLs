@@ -114,7 +114,7 @@ def first_free_row_offset(mst_header):
   return entry_index_to_offset(mst_header['num_entries'])
 
 def roundup(x):
-  return int(math.ceil(x / 4.0)) * 4
+  return int(math.ceil(x / 32.0)) * 32
 
 def add_buffer(data):
   current_offset = len(data)
