@@ -19,6 +19,7 @@ NUM_ENTRIES_OFFSET = 12
 NUM_FREE_ENTRIES_OFFSET=16
 ENTRY_LOCATION_OFFSET = 20
 ENTRY_SIZE_OFFSET = 24
+ENTRY_CRC_OFFSET = 32
 
 #A dirty file injector for msts
 
@@ -149,6 +150,7 @@ def add_table_entry(mst_data, insert_file, insert_file_name, insert_reader):
   write_mst_string(mst_data, row_offset, fname_bytes)
   write_mst_int(mst_data, row_offset + ENTRY_LOCATION_OFFSET, original_size)
   write_mst_int(mst_data, row_offset + ENTRY_SIZE_OFFSET, file_size)
+  write_mst_int(mst_data, row_offset + ENTRY_CRC_OFFSET, mst_header['num_entries']+1)
 
   print(f'Inserted {insert_file_name} with new row entry of {entry_to_data(mst_data, row_offset)}')
 
